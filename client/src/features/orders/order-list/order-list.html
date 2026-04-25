@@ -1,0 +1,32 @@
+<h2 class="text-2xl font-bold mb-6">Orders</h2>
+
+<div class="bg-white shadow rounded-xl overflow-hidden">
+
+  <table class="w-full text-left">
+    <thead class="bg-gray-100">
+      <tr>
+        <th class="p-4">Item</th>
+        <th class="p-4">Qty</th>
+        <th class="p-4">Price</th>
+        <th class="p-4">Status</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let order of orders" class="border-t hover:bg-gray-50">
+        <td class="p-4">{{ order.menuItemName }}</td>
+        <td class="p-4">{{ order.quantity }}</td>
+        <td class="p-4 font-semibold text-blue-600">
+          ₹{{ order.totalPrice }}
+        </td>
+        <td class="p-4">
+          <span class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm">
+            {{ order.status }}
+          </span>
+        </td>
+      </tr>
+    </tbody>
+
+  </table>
+
+</div>
