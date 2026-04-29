@@ -131,3 +131,12 @@
 /Users/balajia/Desktop/AI_Restaurant_System/API/obj/Debug/net9.0/API.pdb
 /Users/balajia/Desktop/AI_Restaurant_System/API/obj/Debug/net9.0/API.genruntimeconfig.cache
 /Users/balajia/Desktop/AI_Restaurant_System/API/obj/Debug/net9.0/ref/API.dll
+/Users/balajia/Desktop/AI_Restaurant_System/API/obj/Debug/net9.0/API.sourcelink.json
+/Users/balajia/Desktop/AI_Restaurant_System/API/bin/Debug/net9.0/Microsoft.AspNetCore.Authentication.JwtBearer.dll
+/Users/balajia/Desktop/AI_Restaurant_System/API/bin/Debug/net9.0/Microsoft.IdentityModel.Abstractions.dll
+/Users/balajia/Desktop/AI_Restaurant_System/API/bin/Debug/net9.0/Microsoft.IdentityModel.JsonWebTokens.dll
+/Users/balajia/Desktop/AI_Restaurant_System/API/bin/Debug/net9.0/Microsoft.IdentityModel.Logging.dll
+/Users/balajia/Desktop/AI_Restaurant_System/API/bin/Debug/net9.0/Microsoft.IdentityModel.Protocols.dll
+/Users/balajia/Desktop/AI_Restaurant_System/API/bin/Debug/net9.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+/Users/balajia/Desktop/AI_Restaurant_System/API/bin/Debug/net9.0/Microsoft.IdentityModel.Tokens.dll
+/Users/balajia/Desktop/AI_Restaurant_System/API/bin/Debug/net9.0/System.IdentityModel.Tokens.Jwt.dll

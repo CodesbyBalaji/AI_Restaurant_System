@@ -1,0 +1,31 @@
+<div class="bg-login min-h-screen w-full flex items-center justify-center relative">
+
+  <div class="absolute inset-0 bg-black/60"></div>
+
+  <div class="relative z-10 bg-white/10 backdrop-blur-lg p-8 rounded-2xl shadow-2xl w-96 text-white">
+
+    <h2 class="text-3xl font-bold mb-6 text-center">
+      🍽️ Restaurant Login
+    </h2>
+
+    <input type="text"
+           [(ngModel)]="username"
+           placeholder="Username"
+           class="w-full p-3 mb-4 rounded-lg bg-white/20 placeholder-white outline-none border border-white/30" />
+
+    <input type="password"
+           [(ngModel)]="password"
+           placeholder="Password"
+           class="w-full p-3 mb-6 rounded-lg bg-white/20 placeholder-white outline-none border border-white/30" />
+
+    <button (click)="login()"
+            class="w-full bg-blue-500 hover:bg-blue-600 transition py-3 rounded-lg font-semibold">
+      Login
+    </button>
+
+    <p class="text-sm text-gray-200 mt-4 text-center"><br>
+    </p>
+
+  </div>
+
+</div>

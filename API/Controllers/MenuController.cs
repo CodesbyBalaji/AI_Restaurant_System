@@ -2,11 +2,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using API.Data;
 using API.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class MenuController : ControllerBase
 {
     private readonly AppDbContext _context;
@@ -17,12 +19,14 @@ public class MenuController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin,Manager")]
     public async Task<ActionResult<IEnumerable<MenuItem>>> GetAll()
     {
         return await _context.MenuItems.ToListAsync();
     }
 
     [HttpGet("{id}")]
+    [Authorize(Roles = "Admin,Manager")]
     public async Task<ActionResult<MenuItem>> GetById(int id)
     {
         var item = await _context.MenuItems.FindAsync(id);
@@ -34,6 +38,7 @@ public class MenuController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<MenuItem>> Create(MenuItem item)
     {
         _context.MenuItems.Add(item);
@@ -43,6 +48,7 @@ public class MenuController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Update(int id, MenuItem updatedItem)
     {
         if (id != updatedItem.Id)
@@ -56,6 +62,7 @@ public class MenuController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(int id)
     {
         var item = await _context.MenuItems.FindAsync(id);
