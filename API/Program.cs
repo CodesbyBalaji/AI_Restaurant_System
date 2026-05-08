@@ -83,6 +83,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     ));
 
 builder.Services.AddScoped<DemandService>();
+builder.Services.AddScoped<MenuOptService>();
 
 var app = builder.Build();
 

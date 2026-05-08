@@ -1,76 +1,47 @@
+using API.Data;
+using API.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using API.Data;
-using API.Models;
-using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-[Authorize]
 public class MenuController : ControllerBase
 {
+    private readonly MenuOptService _service;
     private readonly AppDbContext _context;
 
-    public MenuController(AppDbContext context)
+    public MenuController(MenuOptService service, AppDbContext context)
     {
+        _service = service;
         _context = context;
     }
 
     [HttpGet]
-    [Authorize(Roles = "Admin,Manager")]
-    public async Task<ActionResult<IEnumerable<MenuItem>>> GetAll()
+    public async Task<IActionResult> GetMenu()
     {
-        return await _context.MenuItems.ToListAsync();
+        var items = await _context.MenuItems.ToListAsync();
+        return Ok(items);
     }
 
-    [HttpGet("{id}")]
-    [Authorize(Roles = "Admin,Manager")]
-    public async Task<ActionResult<MenuItem>> GetById(int id)
+    [HttpGet("optimize")]
+    public async Task<IActionResult> GetInsights()
+    {
+        var result = await _service.GetInsightsAsync();
+        return Ok(result);
+    }
+
+    [HttpPut("{id}/price")]
+    public async Task<IActionResult> UpdatePrice(int id, [FromBody] decimal newPrice)
     {
         var item = await _context.MenuItems.FindAsync(id);
 
         if (item == null)
             return NotFound();
 
-        return item;
-    }
+        item.Price = newPrice;
 
-    [HttpPost]
-    [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<MenuItem>> Create(MenuItem item)
-    {
-        _context.MenuItems.Add(item);
-        await _context.SaveChangesAsync();
-
-        return CreatedAtAction(nameof(GetById), new { id = item.Id }, item);
-    }
-
-    [HttpPut("{id}")]
-    [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Update(int id, MenuItem updatedItem)
-    {
-        if (id != updatedItem.Id)
-            return BadRequest();
-
-        _context.Entry(updatedItem).State = EntityState.Modified;
-
-        await _context.SaveChangesAsync();
-
-        return NoContent();
-    }
-
-    [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Delete(int id)
-    {
-        var item = await _context.MenuItems.FindAsync(id);
-
-        if (item == null)
-            return NotFound();
-
-        _context.MenuItems.Remove(item);
         await _context.SaveChangesAsync();
 
         return NoContent();

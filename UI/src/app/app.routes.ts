@@ -5,11 +5,13 @@ import { CreateOrderComponent } from './features/orders/create-order/create-orde
 import { DashboardComponent } from './features/dashboard/dashboard';
 import { LoginComponent } from './features/auth/login/login';
 import { authGuard } from './core/guards/auth-guard';
+import { MenuInsightsComponent } from './features/menu-insights/menu-insights';
 
 export const routes: Routes = [
   { path: '', component: DashboardComponent, canActivate: [authGuard] }, 
   { path: 'menu', component: MenuListComponent },
   { path: 'orders', component: OrdersListComponent },
   { path: 'create-order', component: CreateOrderComponent },
-  { path: 'login', component: LoginComponent }
+  { path: 'login', component: LoginComponent },
+  { path: 'menu-insights', component: MenuInsightsComponent }
 ];

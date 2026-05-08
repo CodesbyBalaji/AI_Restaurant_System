@@ -1,33 +1,57 @@
 <div class="min-h-screen bg-gray-100">
-
-  <nav *ngIf="auth.isLoggedIn()"
-       class="bg-white shadow px-6 py-4 flex justify-between items-center">
-
-    <h1 class="text-xl font-bold text-gray-800">
-      🍽️ AI Restaurant Dashboard
-    </h1>
+  <nav
+    *ngIf="auth.isLoggedIn()"
+    class="bg-white shadow px-6 py-4 flex justify-between items-center"
+  >
+    <h1 class="text-xl font-bold text-gray-800">AI Restaurant Dashboard</h1>
 
     <div class="space-x-6">
-      <a routerLink="/" class="hover:text-blue-600">Dashboard</a>
-      <a routerLink="/menu" class="hover:text-blue-600">Menu</a>
-      <a routerLink="/orders" class="hover:text-blue-600">Orders</a>
+      <a
+        routerLink="/"
+        routerLinkActive="text-blue-600 border-b-2 border-blue-600"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="hover:text-blue-600 pb-1"
+      >
+        Dashboard
+      </a>
 
-    <a *ngIf="auth.getRole() === 'Manager'"
-      routerLink="/create-order"
-      class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
-      + Order
-    </a>
+      <a
+        routerLink="/menu"
+        routerLinkActive="text-blue-600 border-b-2 border-blue-600"
+        class="hover:text-blue-600 pb-1"
+      >
+        Menu
+      </a>
 
-    <button (click)="confirmLogout()"
-            class="text-red-500 font-semibold">
-      Logout
-    </button>
+      <a
+        routerLink="/orders"
+        routerLinkActive="text-blue-600 border-b-2 border-blue-600"
+        class="hover:text-blue-600 pb-1"
+      >
+        Orders
+      </a>
+
+      <a
+        routerLink="/menu-insights"
+        routerLinkActive="text-blue-600 border-b-2 border-blue-600"
+        class="hover:text-blue-600 pb-1"
+      >
+        Menu Insights
+      </a>
+
+      <a
+        *ngIf="auth.getRole() === 'Manager'"
+        routerLink="/create-order"
+        class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+      >
+        + Order
+      </a>
+
+      <button (click)="confirmLogout()" class="text-red-500 font-semibold">Logout</button>
     </div>
-
   </nav>
 
   <div class="p-0">
     <router-outlet></router-outlet>
   </div>
-
 </div>

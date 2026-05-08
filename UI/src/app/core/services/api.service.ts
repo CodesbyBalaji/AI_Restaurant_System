@@ -36,7 +36,7 @@ export class ApiService {
   }
 
   getDemandPrediction() {
-  return this.http.get<any[]>(`${this.baseUrl}/demand/predict`);
+    return this.http.get<any[]>(`${this.baseUrl}/demand/predict`);
   }
 
   deleteOrder(id: number) {
@@ -44,12 +44,19 @@ export class ApiService {
   }
 
   updateOrderStatus(id: number, status: string) {
-  return this.http.put(
-    `${this.baseUrl}/orders/${id}/status`,
-    JSON.stringify(status), 
-    {
-      headers: { 'Content-Type': 'application/json' }
-    }
-  );
-}
+    return this.http.put(
+      `${this.baseUrl}/orders/${id}/status`,
+      JSON.stringify(status),
+      {
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
+  }
+  getMenuInsights() {
+    return this.http.get<any[]>('http://localhost:5000/api/menu/optimize');
+  }
+
+  updateMenuPrice(id: number, price: number) {
+    return this.http.put(`http://localhost:5000/api/menu/${id}/price`, price);
+  }
 }
