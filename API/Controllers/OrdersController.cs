@@ -20,10 +20,39 @@ public class OrdersController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<OrderResponseDto>>> GetAll()
+    public async Task<ActionResult<IEnumerable<OrderResponseDto>>> GetAll(
+        [FromQuery] string filter = "week")
     {
-        var orders = await _context.Orders
+        var now = DateTime.Now;
+
+        IQueryable<Order> query = _context.Orders;
+
+        query = filter.ToLower() switch
+        {
+            "day" => query.Where(o =>
+                o.OrderedAt.Date == now.Date),
+
+            "week" => query.Where(o =>
+                o.OrderedAt >= now.AddDays(-7)),
+
+            "month" => query.Where(o =>
+                o.OrderedAt >= now.AddMonths(-1)),
+
+            _ => query.Where(o =>
+                o.OrderedAt >= now.AddDays(-7))
+        };
+
+        var limit = filter.ToLower() switch
+        {
+            "day" => 50,
+            "week" => 200,
+            "month" => 500,
+            _ => 200
+        };
+
+        var orders = await query
             .OrderByDescending(o => o.OrderedAt)
+            .Take(limit)
             .ToListAsync();
 
         var result = orders.Select(o => new OrderResponseDto
@@ -53,7 +82,7 @@ public class OrdersController : ControllerBase
             MenuItemName = menuItem.Name,
             Quantity = dto.Quantity,
             TotalPrice = menuItem.Price * dto.Quantity,
-            OrderedAt = DateTime.UtcNow,
+            OrderedAt = DateTime.Now,
             Status = "Pending"
         };
 

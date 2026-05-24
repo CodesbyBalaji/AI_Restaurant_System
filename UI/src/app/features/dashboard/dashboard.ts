@@ -16,6 +16,7 @@ export class DashboardComponent implements OnInit {
 
   revenue: number = 0;
   demandData: any[] = [];
+  aiInsight: string = '';
 
   private peakChart: Chart | null = null;
   private dishChart: Chart | null = null;
@@ -32,6 +33,7 @@ export class DashboardComponent implements OnInit {
     this.loadPeakHours();
     this.loadTopDishes();
     this.loadDemandData();
+    this.loadAISummary();
   }
 
   loadRevenue() {
@@ -175,6 +177,24 @@ export class DashboardComponent implements OnInit {
       });
     });
   }
+
+  loadAISummary() {
+
+  this.api.getAISummary().subscribe({
+
+    next: (res: any) => {
+
+      this.aiInsight = res.insight;
+
+      this.cdr.detectChanges();
+    },
+
+    error: (err) => {
+
+      console.error('AI summary failed:', err);
+    }
+  });
+}
 
   getTrendArrow(trend: number): string {
     if (trend > 10) return '▲';

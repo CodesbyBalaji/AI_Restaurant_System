@@ -4,10 +4,10 @@
 
 namespace API.Migrations
 {
-    /// <inheritdoc />
+    
     public partial class UpdateDecimalFix : Migration
     {
-        /// <inheritdoc />
+        
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<decimal>(
@@ -27,7 +27,7 @@ namespace API.Migrations
                 oldType: "decimal(65,30)");
         }
 
-        /// <inheritdoc />
+        
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<decimal>(

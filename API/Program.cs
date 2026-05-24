@@ -84,6 +84,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<DemandService>();
 builder.Services.AddScoped<MenuOptService>();
+builder.Services.AddHttpClient<MlPredictionService>();
+builder.Services.AddHttpClient<AIInsightService>();
+builder.Services.AddHttpClient<MenuAIInsightService>();
+
 
 var app = builder.Build();
 
@@ -92,6 +96,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+
 
 app.UseHttpsRedirection();
 

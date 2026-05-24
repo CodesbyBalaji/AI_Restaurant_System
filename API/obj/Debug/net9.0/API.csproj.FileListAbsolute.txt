@@ -140,3 +140,4 @@
 /Users/balajia/Desktop/AI_Restaurant_System/API/bin/Debug/net9.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
 /Users/balajia/Desktop/AI_Restaurant_System/API/bin/Debug/net9.0/Microsoft.IdentityModel.Tokens.dll
 /Users/balajia/Desktop/AI_Restaurant_System/API/bin/Debug/net9.0/System.IdentityModel.Tokens.Jwt.dll
+/Users/balajia/Desktop/AI_Restaurant_System/API/bin/Debug/net9.0/Newtonsoft.Json.dll

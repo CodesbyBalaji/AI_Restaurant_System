@@ -24,11 +24,23 @@ export class OrdersListComponent implements OnInit {
     this.loadOrders();
   }
 
+  selectedFilter = 'week';
+
   loadOrders() {
-    this.api.getOrders().subscribe(res => {
-      this.orders = res;
-      this.cdr.detectChanges();
-    });
+    this.api.getOrders(this.selectedFilter)
+      .subscribe(res => {
+
+        this.orders = res;
+
+        this.cdr.detectChanges();
+      });
+  }
+
+  changeFilter(filter: string) {
+
+  this.selectedFilter = filter;
+
+  this.loadOrders();
   }
 
   isAdmin(): boolean {

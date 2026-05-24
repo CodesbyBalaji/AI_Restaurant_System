@@ -19,7 +19,7 @@ public class DemandController : ControllerBase
     [HttpGet("predict")]
     public async Task<IActionResult> Predict()
     {
-        var result = await _service.PredictDemand();
+        var result = await _service.PredictDemandAsync();
         return Ok(result);
     }
 }

@@ -27,9 +27,10 @@ export class LoginComponent {
         this.auth.startAutoLogout(); 
         this.router.navigate(['/']);
       },
-      error: () => {
-        alert("Invalid credentials");
-      }
+      error: (err) => {
+      console.log(err);
+      alert(JSON.stringify(err.error));
+    }
     });
   }
 }

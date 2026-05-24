@@ -35,7 +35,7 @@ public static class DbSeeder
                 MenuItemName = item.Name,
                 Quantity = qty,
                 TotalPrice = item.Price * qty,
-                OrderedAt = DateTime.UtcNow.AddHours(-random.Next(1, 72)), // last 3 days
+                OrderedAt = DateTime.UtcNow.AddHours(-random.Next(1, 72)), 
                 Status = "Completed"
             });
         }

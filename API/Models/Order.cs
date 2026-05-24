@@ -8,7 +8,7 @@ public class Order
 
     public int MenuItemId { get; set; }
 
-    // Navigation Property (relationship)
+    
     public MenuItem? MenuItem { get; set; }
 
     public required string MenuItemName { get; set; }

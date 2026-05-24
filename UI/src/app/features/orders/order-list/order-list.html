@@ -1,59 +1,124 @@
-<div class="bg-white shadow rounded-xl overflow-hidden">
+<div class="bg-white shadow rounded-xl overflow-hidden p-4">
 
-  <table class="w-full text-left">
-    <thead class="bg-gray-100">
-      <tr>
-        <th class="p-4">Item</th>
-        <th class="p-4">Qty</th>
-        <th class="p-4">Price</th>
-        <th class="p-4">Status</th>
-        <th *ngIf="isAdmin()" class="p-4 text-center">Actions</th>
-      </tr>
-    </thead>
+  <div class="flex flex-wrap items-center gap-3 mb-4">
 
-    <tbody>
-      <tr *ngFor="let order of orders" class="border-t hover:bg-gray-50">
+    <button
+      (click)="changeFilter('day')"
+      [ngClass]="selectedFilter === 'day'
+        ? 'bg-blue-700'
+        : 'bg-blue-500 hover:bg-blue-600'"
+      class="px-4 py-2 text-white rounded-lg transition"
+    >
+      Today
+    </button>
 
-        <td class="p-4">{{ order.menuItemName }}</td>
+    <button
+      (click)="changeFilter('week')"
+      [ngClass]="selectedFilter === 'week'
+        ? 'bg-green-700'
+        : 'bg-green-500 hover:bg-green-600'"
+      class="px-4 py-2 text-white rounded-lg transition"
+    >
+      This Week
+    </button>
 
-        <td class="p-4">{{ order.quantity }}</td>
+    <button
+      (click)="changeFilter('month')"
+      [ngClass]="selectedFilter === 'month'
+        ? 'bg-purple-700'
+        : 'bg-purple-500 hover:bg-purple-600'"
+      class="px-4 py-2 text-white rounded-lg transition"
+    >
+      This Month
+    </button>
 
-        <td class="p-4 font-semibold text-blue-600">
-          ₹{{ order.totalPrice }}
-        </td>
+    <div class="ml-auto text-gray-600 font-medium">
+      Showing {{ orders.length }} orders
+    </div>
 
-        <td class="p-4">
+  </div>
 
-          <select *ngIf="isManagerOrAdmin()"
-                  [value]="order.status"
-                  (change)="updateStatus(order.id, $any($event.target).value)"
-                  class="px-2 py-1 border rounded">
+  <div class="overflow-x-auto">
 
-            <option value="Pending">Pending</option>
-            <option value="Preparing">Preparing</option>
-            <option value="Completed">Completed</option>
-          </select>
+    <table class="w-full text-left">
 
-          <span *ngIf="!isManagerOrAdmin()"
-                class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm">
-            {{ order.status }}
-          </span>
+      <thead class="bg-gray-100">
+        <tr>
+          <th class="p-4">Item</th>
+          <th class="p-4">Qty</th>
+          <th class="p-4">Price</th>
+          <th class="p-4">Status</th>
 
-        </td>
+          <th
+            *ngIf="isAdmin()"
+            class="p-4 text-center"
+          >
+            Actions
+          </th>
+        </tr>
+      </thead>
 
-        <td class="p-4 text-center">
+      <tbody>
 
-          <button *ngIf="isAdmin()"
-                  (click)="deleteOrder(order.id)"
-                  class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm">
-            Delete
-          </button>
+        <tr
+          *ngFor="let order of orders"
+          class="border-t hover:bg-gray-50 transition"
+        >
 
-        </td>
+          <td class="p-4 font-medium text-gray-800">
+            {{ order.menuItemName }}
+          </td>
 
-      </tr>
-    </tbody>
+          <td class="p-4">
+            {{ order.quantity }}
+          </td>
 
-  </table>
+          <td class="p-4 font-semibold text-blue-600">
+            ₹{{ order.totalPrice }}
+          </td>
+
+          <td class="p-4">
+
+            <select
+              *ngIf="isManagerOrAdmin()"
+              [value]="order.status"
+              (change)="updateStatus(order.id, $any($event.target).value)"
+              class="px-3 py-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            >
+              <option value="Pending">Pending</option>
+              <option value="Preparing">Preparing</option>
+              <option value="Completed">Completed</option>
+            </select>
+
+            <span
+              *ngIf="!isManagerOrAdmin()"
+              class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm"
+            >
+              {{ order.status }}
+            </span>
+
+          </td>
+
+          <td
+            *ngIf="isAdmin()"
+            class="p-4 text-center"
+          >
+
+            <button
+              (click)="deleteOrder(order.id)"
+              class="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 transition text-sm"
+            >
+              Delete
+            </button>
+
+          </td>
+
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
 
 </div>

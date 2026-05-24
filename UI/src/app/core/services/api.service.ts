@@ -15,8 +15,10 @@ export class ApiService {
     return this.http.get(`${this.baseUrl}/menu`);
   }
 
-  getOrders(): Observable<any> {
-    return this.http.get(`${this.baseUrl}/orders`);
+  getOrders(filter: string = 'week') {
+    return this.http.get<any[]>(
+      `${this.baseUrl}/orders?filter=${filter}`
+    );
   }
 
   createOrder(data: any): Observable<any> {
@@ -39,6 +41,12 @@ export class ApiService {
     return this.http.get<any[]>(`${this.baseUrl}/demand/predict`);
   }
 
+  getAISummary() {
+  return this.http.get<any>(
+    `${this.baseUrl}/insights/summary`
+  );
+}
+
   deleteOrder(id: number) {
     return this.http.delete(`${this.baseUrl}/orders/${id}`);
   }
@@ -59,4 +67,5 @@ export class ApiService {
   updateMenuPrice(id: number, price: number) {
     return this.http.put(`http://localhost:5000/api/menu/${id}/price`, price);
   }
+
 }

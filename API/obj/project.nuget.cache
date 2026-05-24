@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "EG9/eWa6SKY=",
+  "dgSpecHash": "UFfeviRyu7o=",
   "success": true,
   "projectFilePath": "/Users/balajia/Desktop/AI_Restaurant_System/API/API.csproj",
   "expectedPackageFiles": [
@@ -42,6 +42,7 @@
     "/Users/balajia/.nuget/packages/microsoft.openapi/1.6.25/microsoft.openapi.1.6.25.nupkg.sha512",
     "/Users/balajia/.nuget/packages/mono.texttemplating/3.0.0/mono.texttemplating.3.0.0.nupkg.sha512",
     "/Users/balajia/.nuget/packages/mysqlconnector/2.4.0/mysqlconnector.2.4.0.nupkg.sha512",
+    "/Users/balajia/.nuget/packages/newtonsoft.json/13.0.4/newtonsoft.json.13.0.4.nupkg.sha512",
     "/Users/balajia/.nuget/packages/pomelo.entityframeworkcore.mysql/9.0.0/pomelo.entityframeworkcore.mysql.9.0.0.nupkg.sha512",
     "/Users/balajia/.nuget/packages/swashbuckle.aspnetcore/9.0.6/swashbuckle.aspnetcore.9.0.6.nupkg.sha512",
     "/Users/balajia/.nuget/packages/swashbuckle.aspnetcore.swagger/9.0.6/swashbuckle.aspnetcore.swagger.9.0.6.nupkg.sha512",
