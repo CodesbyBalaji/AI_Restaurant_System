@@ -7,11 +7,23 @@ public class MlPredictionResult
 {
     public int MenuItemId { get; set; }
 
+    public int ThisWeek { get; set; }
+
+    public int LastWeek { get; set; }
+
+    public int TwoWeeksAgo { get; set; }
+
     public double PredictedDemand { get; set; }
 
     public double TrendPercent { get; set; }
 
+    public double ForecastChangePercent { get; set; }
+
     public double ConfidencePercent { get; set; }
+
+    public int LowerBound { get; set; }
+
+    public int UpperBound { get; set; }
 }
 
 public class MlPredictionService
@@ -28,11 +40,7 @@ public class MlPredictionService
             List<int> itemIds,
             CancellationToken ct = default)
     {
-
-        var payload = new
-        {
-            itemIds = itemIds
-        };
+        var payload = new { itemIds = itemIds };
 
         var json = JsonConvert.SerializeObject(payload);
 
@@ -43,11 +51,8 @@ public class MlPredictionService
         );
 
         var response = await _http.PostAsync(
-
             "http://127.0.0.1:8000/predict",
-
             content,
-
             ct
         );
 
@@ -60,8 +65,6 @@ public class MlPredictionService
             List<MlPredictionResult>
         >(result)!;
 
-        return data.ToDictionary(
-            x => x.MenuItemId
-        );
+        return data.ToDictionary(x => x.MenuItemId);
     }
 }

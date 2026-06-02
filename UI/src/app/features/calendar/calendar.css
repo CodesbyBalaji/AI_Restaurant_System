@@ -1,0 +1,33 @@
+:host ::ng-deep .fc {
+
+  font-family: inherit;
+}
+
+:host ::ng-deep .fc-toolbar-title {
+
+  font-size: 1.5rem;
+
+  font-weight: 700;
+}
+
+:host ::ng-deep .fc-button {
+
+  background: #2563eb !important;
+
+  border: none !important;
+
+  border-radius: 12px !important;
+
+  padding: 8px 14px !important;
+}
+
+:host ::ng-deep .fc-event {
+
+  border: none !important;
+
+  border-radius: 10px !important;
+
+  padding: 4px !important;
+
+  font-weight: 600;
+}

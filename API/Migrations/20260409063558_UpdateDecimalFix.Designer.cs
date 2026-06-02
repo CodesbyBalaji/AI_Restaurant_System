@@ -14,7 +14,7 @@ namespace API.Migrations
     [Migration("20260409063558_UpdateDecimalFix")]
     partial class UpdateDecimalFix
     {
-        
+
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618

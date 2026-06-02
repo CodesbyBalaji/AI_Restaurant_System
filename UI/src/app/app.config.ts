@@ -4,13 +4,17 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 
 import { routes } from './app.routes';
 import { authInterceptor } from './core/interceptors/auth-interceptor';
+import { provideLottieOptions } from 'ngx-lottie';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes, withRouterConfig({
-      onSameUrlNavigation: 'reload' 
+      onSameUrlNavigation: 'reload'
     })),
-    provideHttpClient(withInterceptors([authInterceptor]))
+    provideHttpClient(withInterceptors([authInterceptor])),
+    provideLottieOptions({
+      player: () => import('lottie-web')
+    })
   ]
 };

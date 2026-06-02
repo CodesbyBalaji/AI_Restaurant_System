@@ -3,17 +3,19 @@ import { CommonModule } from '@angular/common';
 import { ApiService } from '../../core/services/api.service';
 import { ChangeDetectorRef } from '@angular/core';
 import { Chart, registerables } from 'chart.js';
+import { LottieComponent } from "ngx-lottie";
 
 Chart.register(...registerables);
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, LottieComponent],
   templateUrl: './dashboard.html'
 })
 export class DashboardComponent implements OnInit {
 
+  isLoading = true;
   revenue: number = 0;
   demandData: any[] = [];
   aiInsight: string = '';
@@ -26,14 +28,98 @@ export class DashboardComponent implements OnInit {
   @ViewChild('dishChartCanvas') dishChartRef!: ElementRef;
   @ViewChild('demandChartCanvas') demandChartRef!: ElementRef;
 
-  constructor(private api: ApiService, private cdr: ChangeDetectorRef) {}
+  constructor(private api: ApiService, private cdr: ChangeDetectorRef) { }
 
   ngOnInit() {
+
+    this.isLoading = true;
+
     this.loadRevenue();
+
     this.loadPeakHours();
+
     this.loadTopDishes();
-    this.loadDemandData();
-    this.loadAISummary();
+
+    this.loadDashboard();
+  }
+
+  loadingOptions = {
+    path: '/assets/loading.json'
+  };
+
+  aiLoaded = false;
+  demandLoaded = false;
+
+  loadDashboard() {
+
+    this.api.getDemandPrediction()
+      .subscribe({
+
+        next: (data) => {
+
+          this.demandData = data;
+
+          this.cdr.detectChanges();
+
+          this.renderDemandChart(data);
+
+          this.isLoading = false;
+        },
+
+        error: () => {
+
+          this.isLoading = false;
+        }
+      });
+
+    this.api.getAISummary()
+      .subscribe({
+
+        next: (res: any) => {
+
+          this.aiInsight = res.insight;
+
+          this.cdr.detectChanges();
+        }
+      });
+  }
+
+  refreshDashboard() {
+
+    this.isLoading = true;
+    this.cdr.detectChanges();
+
+    this.api.getDemandPrediction(true)
+      .subscribe({
+
+        next: (data) => {
+
+          this.demandData = data;
+
+          this.renderDemandChart(data);
+
+          this.isLoading = false;
+
+          this.cdr.detectChanges();
+        },
+
+        error: () => {
+
+          this.isLoading = false;
+
+          this.cdr.detectChanges();
+        }
+      });
+
+    this.api.getAISummary(true)
+      .subscribe({
+
+        next: (res: any) => {
+
+          this.aiInsight = res.insight;
+          this.cdr.detectChanges();
+        }
+      });
   }
 
   loadRevenue() {
@@ -106,116 +192,87 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  loadDemandData() {
-    this.api.getDemandPrediction().subscribe({
-      next: (data: any[]) => {
-        this.demandData = data;
-        this.cdr.detectChanges();
-        this.renderDemandChart(data);
-      },
-      error: (err) => console.error('Demand prediction failed:', err)
-    });
-  }
-
   private renderDemandChart(data: any[]) {
 
-    const labels = data.map(x => x.dishName);
+  const labels = data.map(x => x.dishName);
 
-    const current = data.map(x => x.thisWeek);
-    const predicted = data.map(x => x.predictedNextWeek);
+  const current = data.map(x => x.thisWeek);
+  const predicted = data.map(x => x.predictedNextWeek);
 
-    if (this.demandChart) this.demandChart.destroy();
+  if (this.demandChart) this.demandChart.destroy();
 
-    setTimeout(() => {
-      this.demandChart = new Chart(this.demandChartRef.nativeElement, {
-        type: 'bar',
-        data: {
-          labels,
-          datasets: [
-            {
-              label: 'Current Week',
-              data: current,
-              backgroundColor: '#3B82F6',
-              borderRadius: 6
-            },
-            {
-              label: 'Predicted Next Week',
-              data: predicted,
-              backgroundColor: '#10B981',
-              borderRadius: 6
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { position: 'top' },
-            tooltip: {
-              callbacks: {
-                afterLabel: (ctx) => {
-                  const item = data[ctx.dataIndex];
-                  return [
-                    `Trend: ${item.trendPercent}%`,
-                    `Confidence: ${item.confidencePercent}%`,
-                    `Action: ${item.recommendation}`
-                  ];
-                }
-              }
-            }
+  setTimeout(() => {
+    this.demandChart = new Chart(this.demandChartRef.nativeElement, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Current Week',
+            data: current,
+            backgroundColor: '#3B82F6',
+            borderRadius: 6
           },
-          scales: {
-            y: {
-              beginAtZero: true,
-              title: {
-                display: true,
-                text: 'Orders'
+          {
+            label: 'Predicted Next Week',
+            data: predicted,
+            backgroundColor: '#10B981',
+            borderRadius: 6
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'top' },
+          tooltip: {
+            callbacks: {
+              afterLabel: (ctx) => {
+                const item = data[ctx.dataIndex];
+                return [
+                  `Trend: ${item.trendPercent}%`,
+                  `Confidence: ${item.confidencePercent}%`,
+                  `Action: ${item.recommendation}`
+                ];
               }
             }
           }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Orders'
+            }
+          }
         }
-      });
+      }
     });
-  }
-
-  loadAISummary() {
-
-  this.api.getAISummary().subscribe({
-
-    next: (res: any) => {
-
-      this.aiInsight = res.insight;
-
-      this.cdr.detectChanges();
-    },
-
-    error: (err) => {
-
-      console.error('AI summary failed:', err);
-    }
   });
 }
 
-  getTrendArrow(trend: number): string {
-    if (trend > 10) return '▲';
-    if (trend < -10) return '▼';
-    return '→';
-  }
+getTrendArrow(trend: number): string {
+  if (trend > 10) return '▲';
+  if (trend < -10) return '▼';
+  return '→';
+}
 
-  getConfidenceColor(confidence: number): string {
-    if (confidence >= 80) return '#10B981';
-    if (confidence >= 65) return '#F59E0B';
-    return '#EF4444';
-  }
+getConfidenceColor(confidence: number): string {
+  if (confidence >= 80) return '#10B981';
+  if (confidence >= 65) return '#F59E0B';
+  return '#EF4444';
+}
 
-  getImageByName(name: string): string {
-    const imageMap: Record<string, string> = {
-      'biryani': 'assets/images/biryani.png',
-      'fried rice': 'assets/images/fried rice.png',
-      'noodles': 'assets/images/noodles.png',
-      'burger': 'assets/images/burger.png',
-      'pizza': 'assets/images/pizza.png'
-    };
-    return imageMap[name.toLowerCase()] || 'assets/images/default-food.png';
-  }
+getImageByName(name: string): string {
+  const imageMap: Record<string, string> = {
+    'biryani': 'assets/images/biryani.png',
+    'fried rice': 'assets/images/fried rice.png',
+    'noodles': 'assets/images/noodles.png',
+    'burger': 'assets/images/burger.png',
+    'pizza': 'assets/images/pizza.png'
+  };
+  return imageMap[name.toLowerCase()] || 'assets/images/default-food.png';
+}
 }

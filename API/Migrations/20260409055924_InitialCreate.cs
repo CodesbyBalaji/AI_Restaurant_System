@@ -5,10 +5,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace API.Migrations
 {
-    
+
     public partial class InitialCreate : Migration
     {
-        
+
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterDatabase()
@@ -35,7 +35,6 @@ namespace API.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
         }
 
-        
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(

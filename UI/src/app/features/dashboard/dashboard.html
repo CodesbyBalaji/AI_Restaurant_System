@@ -1,3 +1,22 @@
+<div *ngIf="isLoading"
+     class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
+
+  <ng-lottie
+    [options]="loadingOptions"
+    width="260px"
+    height="260px">
+  </ng-lottie>
+
+  <h2 class="text-white text-2xl font-bold mt-4">
+    AI is analyzing restaurant data...
+  </h2>
+
+  <p class="text-gray-300 mt-2">
+    Predicting Demand
+  </p>
+
+</div>
+
 <div class="bg-gray-200 p-6 rounded-xl shadow mb-6">
   <h3 class="text-gray-500">Total Revenue</h3>
   <p class="text-3xl font-bold text-blue-600">
@@ -14,6 +33,16 @@
     <h2 class="text-2xl font-bold">
       AI Restaurant Insight
     </h2>
+
+    <button
+    (click)="refreshDashboard()"
+    class="bg-blue-500 hover:bg-blue-600
+           text-white px-4 py-2 rounded-xl
+           shadow transition">
+
+    ⟳ Refresh
+
+  </button>
 
   </div>
 
@@ -45,7 +74,6 @@
     <canvas #demandChartCanvas></canvas>
   </div>
 
-
   <div class="flex justify-center gap-6 mt-4 text-xs text-gray-500">
     <span class="flex items-center gap-2">
       <span class="w-3 h-3 bg-blue-500 rounded-sm"></span>
@@ -59,9 +87,13 @@
 
 </div>
 
-<h2 class="text-2xl font-bold mt-6 mb-6 text-gray-800">
-   Demand Prediction
-</h2>
+<div class="flex justify-between items-center mt-6 mb-6">
+
+  <h2 class="text-2xl font-bold text-gray-800">
+    Demand Prediction
+  </h2>
+
+</div>
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
 
@@ -156,7 +188,6 @@
 
     </div>
   </div>
-  
 
 </div>
 

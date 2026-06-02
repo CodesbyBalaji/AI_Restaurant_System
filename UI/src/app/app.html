@@ -5,7 +5,7 @@
   >
     <h1 class="text-xl font-bold text-gray-800">AI Restaurant Dashboard</h1>
 
-    <div class="space-x-6">
+    <div class="flex items-center gap-6">
       <a
         routerLink="/"
         routerLinkActive="text-blue-600 border-b-2 border-blue-600"
@@ -40,6 +40,14 @@
       </a>
 
       <a
+        routerLink="/calendar"
+        routerLinkActive="text-blue-600 border-b-2 border-blue-600"
+        class="hover:text-blue-600 pb-1"
+      >
+        Calendar
+      </a>
+
+      <a
         *ngIf="auth.getRole() === 'Manager'"
         routerLink="/create-order"
         class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
@@ -47,7 +55,38 @@
         + Order
       </a>
 
-      <button (click)="confirmLogout()" class="text-red-500 font-semibold">Logout</button>
+      <div class="relative" (click)="$event.stopPropagation()">
+        <div
+          class="cursor-pointer"
+          (click)="toggleProfileMenu(); $event.stopPropagation()"
+        >
+          <ng-container *ngIf="role?.toLowerCase() === 'admin'; else managerAnimation">
+            <ng-lottie [options]="{ path: '/assets/admin.json' }" width="80px" height="80px">
+            </ng-lottie>
+          </ng-container>
+
+          <ng-template #managerAnimation>
+            <ng-lottie [options]="{ path: '/assets/manager.json' }" width="80px" height="80px">
+            </ng-lottie>
+          </ng-template>
+        </div>
+
+        <div
+          *ngIf="showProfileMenu"
+          class="absolute right-0 mt-2 w-48 bg-white border rounded-xl shadow-lg z-50"
+        >
+          <div class="px-4 py-3 border-b">
+            <p class="font-semibold">{{ role }}</p>
+          </div>
+
+          <button
+            (click)="confirmLogout()"
+            class="w-full text-left px-4 py-3 text-red-500 hover:bg-gray-100"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
     </div>
   </nav>
 

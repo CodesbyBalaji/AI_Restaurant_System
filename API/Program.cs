@@ -88,7 +88,6 @@ builder.Services.AddHttpClient<MlPredictionService>();
 builder.Services.AddHttpClient<AIInsightService>();
 builder.Services.AddHttpClient<MenuAIInsightService>();
 
-
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -97,13 +96,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-
-
 app.UseHttpsRedirection();
 
 app.UseCors("AllowAngular");
 
-app.UseAuthentication(); 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

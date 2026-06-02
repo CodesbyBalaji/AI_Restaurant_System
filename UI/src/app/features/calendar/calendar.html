@@ -1,0 +1,293 @@
+<div class="min-h-screen bg-gray-100 p-6">
+
+  <div
+    class="bg-gradient-to-r from-blue-600 to-indigo-700
+           rounded-3xl shadow-xl p-8 text-white mb-8">
+
+    <div class="flex justify-between items-center">
+
+      <div>
+
+        <h1 class="text-4xl font-bold">
+
+          Festival Intelligence Calendar
+
+        </h1>
+
+        <p class="mt-2 text-blue-100 text-lg">
+
+          AI-powered seasonal demand forecasting
+          and festival sales analytics
+
+        </p>
+
+      </div>
+
+      <div
+        class="bg-white/20 backdrop-blur-md
+               px-5 py-3 rounded-2xl">
+
+        <div class="text-sm opacity-90">
+
+          Powered By
+
+        </div>
+
+        <div class="font-bold text-lg">
+
+          Prophet + AI
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <div
+    class="bg-white rounded-3xl
+           shadow-xl p-6">
+
+    <full-calendar
+      [options]="calendarOptions">
+    </full-calendar>
+
+  </div>
+
+  <div
+    *ngIf="loading"
+    class="mt-8 bg-white rounded-3xl
+           shadow-lg p-10 text-center">
+
+    <div
+      class="animate-spin rounded-full
+             h-16 w-16 border-b-4
+             border-blue-600 mx-auto">
+
+    </div>
+
+    <p class="mt-4 text-gray-600 text-lg">
+
+      Loading Festival Intelligence...
+
+    </p>
+
+  </div>
+
+  <div
+    *ngIf="selectedFestival && !loading"
+
+    class="mt-8 bg-white rounded-3xl
+           shadow-xl p-8">
+
+    <div
+      class="flex justify-between items-center">
+
+      <div>
+
+        <h2
+          class="text-3xl font-bold text-gray-800">
+
+          {{ selectedFestival.title }}
+
+        </h2>
+
+        <p class="text-gray-500 mt-1">
+
+          Festival demand forecast and
+          historical comparison
+
+        </p>
+
+      </div>
+
+      <div
+        class="bg-green-100 text-green-700
+               px-5 py-3 rounded-2xl
+               font-semibold">
+
+        Seasonal Analytics
+
+      </div>
+
+    </div>
+
+    <div
+      class="grid grid-cols-1 md:grid-cols-2
+             xl:grid-cols-3 gap-6 mt-10">
+
+      <div
+        *ngFor="
+          let item of selectedFestival.items
+        "
+
+        class="bg-gradient-to-br
+               from-gray-50 to-white
+               border border-gray-200
+               rounded-3xl p-6
+               shadow-sm hover:shadow-xl
+               transition-all duration-300">
+
+        <div
+          class="flex justify-between items-center">
+
+          <h3
+            class="text-2xl font-bold
+                   text-gray-800">
+
+            {{ item.dishName }}
+
+          </h3>
+
+          <div
+            class="text-sm px-3 py-1
+                   rounded-full"
+
+            [ngClass]="
+              getGrowthColor(
+                item.growthPercent
+              )
+            ">
+
+            {{
+              item.growthPercent > 0
+              ? '▲'
+              : '▼'
+            }}
+
+            {{
+              item.growthPercent
+            }}%
+
+          </div>
+
+        </div>
+
+        <div class="mt-6 space-y-4">
+
+          <div
+            class="flex justify-between">
+
+            <span class="text-gray-500">
+
+              Last Year Sales
+
+            </span>
+
+            <span
+              class="font-bold text-gray-700">
+
+              {{ item.lastYearSales }}
+
+            </span>
+
+          </div>
+
+          <div
+            class="flex justify-between">
+
+            <span class="text-gray-500">
+
+              Predicted This Year
+
+            </span>
+
+            <span
+              class="font-bold text-blue-600">
+
+              {{ item.predictedSales }}
+
+            </span>
+
+          </div>
+
+          <div
+            class="flex justify-between">
+
+            <span class="text-gray-500">
+
+              Expected Growth
+
+            </span>
+
+            <span
+              class="font-bold"
+
+              [ngClass]="
+                getGrowthColor(
+                  item.growthPercent
+                )
+              ">
+
+              {{
+                item.growthPercent
+              }}%
+
+            </span>
+
+          </div>
+
+        </div>
+
+        <div
+          class="mt-6 p-4 rounded-2xl
+                 bg-blue-50 border
+                 border-blue-100">
+
+          <div
+            class="text-sm text-blue-800
+                   font-semibold">
+
+            AI Recommendation
+
+          </div>
+
+          <div
+            class="mt-1 text-blue-700">
+
+            {{
+              getRecommendation(
+                item.growthPercent
+              )
+            }}
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div
+      class="mt-10 bg-gradient-to-r
+             from-indigo-50 to-blue-50
+             border border-indigo-100
+             rounded-3xl p-8">
+
+      <h3
+        class="text-2xl font-bold
+               text-indigo-800 mb-4">
+
+        🤖 AI Festival Insight
+
+      </h3>
+
+      <p
+        class="text-indigo-700 leading-8
+               text-lg">
+
+        Seasonal demand forecasting indicates
+        significant variation across menu items
+        during this festival period. Focus on
+        high-growth items to optimize inventory,
+        staffing, and promotional strategies.
+
+      </p>
+
+    </div>
+
+  </div>
+
+</div>

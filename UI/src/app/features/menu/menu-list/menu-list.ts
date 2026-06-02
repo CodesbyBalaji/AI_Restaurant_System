@@ -18,7 +18,7 @@ export class MenuListComponent implements OnInit {
     private api: ApiService,
     private cdr: ChangeDetectorRef,
     private router: Router,
-    public auth: AuthService   
+    public auth: AuthService
   ) {}
 
   ngOnInit() {
@@ -74,6 +74,5 @@ export class MenuListComponent implements OnInit {
       }
     });
   }
-
 
 }

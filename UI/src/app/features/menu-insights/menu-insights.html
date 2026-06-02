@@ -1,42 +1,233 @@
-<table class="w-full bg-white shadow rounded-xl overflow-hidden">
 
-  <thead class="bg-gray-100">
-    <tr>
-      <th class="p-3">Item</th>
-      <th class="p-3">Price</th>
-      <th class="p-3">Margin</th>
-      <th class="p-3">Demand</th>
-      <th class="p-3">Action</th>
-      <th class="p-3"></th>
-    </tr>
-  </thead>
 
-  <tbody>
-    <tr *ngFor="let item of insights" class="border-t hover:bg-gray-50">
+<div
+  *ngIf="loading"
+  class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center">
 
-      <td class="p-3">{{ item.name }}</td>
-      <td class="p-3">₹{{ item.price }}</td>
-      <td class="p-3">{{ item.marginPercent }}%</td>
-      <td class="p-3">{{ item.demand }}</td>
+  <ng-lottie
+    [options]="loadingOptions"
+    width="260px"
+    height="260px">
+  </ng-lottie>
 
-      <td class="p-3">
-        <span [ngClass]="{
-          'text-green-600': item.action === 'Increase Price',
-          'text-red-500': item.action === 'Reduce Price',
-          'text-yellow-500': item.action === 'Review Cost'
-        }">
-          {{ item.action }}
+  <h2 class="text-white text-2xl font-bold mt-4">
+    {{ loadingText }}
+  </h2>
+
+  <p class="text-gray-300 mt-2">
+    Optimizing prices & analyzing menu performance
+  </p>
+
+</div>
+
+<div class="space-y-6">
+
+  <div *ngIf="loading"
+       class="text-center py-10 text-gray-500">
+
+    Loading AI optimization insights...
+
+  </div>
+
+  <button
+  (click)="refreshInsights()"
+  class="bg-blue-500 hover:bg-blue-600
+         text-white px-4 py-2 rounded-xl shadow">
+
+  ⟳ Refresh Insights
+
+  </button>
+
+  <div
+    class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+
+    <div
+      *ngFor="let item of insights; trackBy: trackById"
+
+      class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100
+             hover:shadow-2xl transition duration-300">
+
+      <div class="flex items-center justify-between">
+
+        <h3 class="text-2xl font-bold text-gray-800">
+          {{ item.name }}
+        </h3>
+
+        <span
+          class="px-3 py-1 rounded-full text-sm font-semibold"
+          [ngClass]="getCategoryColor(item.category)">
+
+          {{ item.category }}
+
         </span>
-      </td>
+      </div>
 
-      <td class="p-3">
-        <button (click)="apply(item)"
-                class="bg-blue-500 text-white px-3 py-1 rounded">
-          Apply
-        </button>
-      </td>
+      <div class="mt-5">
 
-    </tr>
-  </tbody>
+        <div class="flex justify-between text-sm text-gray-500">
+          <span>Performance Score</span>
 
-</table>
+          <span>{{ item.performanceScore }}/100</span>
+        </div>
+
+        <div class="w-full bg-gray-200 rounded-full h-3 mt-2">
+
+          <div
+            class="bg-gradient-to-r from-green-400 to-emerald-600
+                   h-3 rounded-full"
+
+            [style.width.%]="item.performanceScore">
+
+          </div>
+        </div>
+
+      </div>
+
+      <div class="mt-6 grid grid-cols-2 gap-4">
+
+        <div class="bg-gray-50 rounded-xl p-4">
+
+          <p class="text-sm text-gray-500">
+            Current Price
+          </p>
+
+          <p class="text-2xl font-bold text-gray-800">
+            ₹{{ item.currentPrice }}
+          </p>
+        </div>
+
+        <div class="bg-green-50 rounded-xl p-4">
+
+          <p class="text-sm text-gray-500">
+            AI Optimized
+          </p>
+
+          <p class="text-2xl font-bold text-green-700">
+            ₹{{ item.optimizedPrice }}
+          </p>
+        </div>
+
+      </div>
+
+      <div class="mt-4 flex items-center gap-2">
+
+        <span
+          class="text-sm font-semibold px-3 py-1 rounded-full"
+
+          [ngClass]="{
+            'bg-green-100 text-green-700':
+              item.priceChangePercent > 0,
+
+            'bg-red-100 text-red-700':
+              item.priceChangePercent < 0,
+
+            'bg-gray-100 text-gray-700':
+              item.priceChangePercent === 0
+          }">
+
+          {{ item.priceChangePercent > 0 ? '+' : '' }}
+          {{ item.priceChangePercent }}%
+
+        </span>
+
+        <span class="text-sm text-gray-500">
+          Price Optimization
+        </span>
+
+      </div>
+
+      <div class="mt-6 grid grid-cols-2 gap-4">
+
+        <div>
+          <p class="text-gray-500 text-sm">
+            Demand
+          </p>
+
+          <p class="text-xl font-bold">
+            {{ item.demand }}
+          </p>
+        </div>
+
+        <div>
+          <p class="text-gray-500 text-sm">
+            Predicted
+          </p>
+
+          <p class="text-xl font-bold">
+            {{ item.predictedDemand }}
+          </p>
+        </div>
+
+        <div>
+          <p class="text-gray-500 text-sm">
+            Margin
+          </p>
+
+          <p class="text-xl font-bold">
+            {{ item.marginPercent }}%
+          </p>
+        </div>
+
+        <div>
+          <p class="text-gray-500 text-sm">
+            Confidence
+          </p>
+
+          <p class="text-xl font-bold">
+            {{ item.confidencePercent }}%
+          </p>
+        </div>
+
+      </div>
+
+      <div class="mt-5">
+
+        <span
+          class="font-semibold"
+          [ngClass]="getTrendColor(item.trendPercent)">
+
+          {{ item.trendPercent > 0 ? '▲' : '▼' }}
+
+          {{ item.trendPercent }}%
+
+        </span>
+
+        <span class="text-gray-500 ml-2">
+          Demand Trend
+        </span>
+
+      </div>
+
+      <div
+        class="mt-6 bg-blue-50 border border-blue-100
+               rounded-xl p-4">
+
+        <p class="text-sm font-semibold text-blue-700 mb-1">
+          AI Strategy
+        </p>
+
+        <p class="text-gray-700 text-sm leading-relaxed">
+          {{ item.aiInsight }}
+        </p>
+
+      </div>
+
+      <button
+        (click)="apply(item)"
+
+        class="mt-6 w-full bg-gradient-to-r
+               from-emerald-500 to-teal-600
+               text-white py-3 rounded-xl
+               font-semibold shadow-lg
+               hover:scale-[1.02]
+               transition">
+
+        Apply Optimized Price
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
