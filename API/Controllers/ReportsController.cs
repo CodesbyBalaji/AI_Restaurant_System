@@ -24,10 +24,15 @@ public class ReportsController : ControllerBase
             .Select(g => new
             {
                 Hour = g.Key,
-                OrderCount = g.Count()
+                OrderCount = g.Count(),
+
+                Revenue = g.Sum(x =>
+                    x.Quantity * x.MenuItem.Price
+                )
             })
-            .OrderByDescending(x => x.OrderCount)
+            .OrderBy(x => x.Hour)
             .ToListAsync();
+
         return Ok(result);
     }
 

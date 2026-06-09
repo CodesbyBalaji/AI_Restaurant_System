@@ -11,4 +11,5 @@ public class AppDbContext : DbContext
 
     public DbSet<MenuItem> MenuItems { get; set; }
     public DbSet<Order> Orders { get; set; }
+    public DbSet<CompetitorPrice> CompetitorPrices { get; set; }
 }

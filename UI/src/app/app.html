@@ -40,12 +40,20 @@
       </a>
 
       <a
+        routerLink="/price-intelligence"
+        routerLinkActive="text-blue-600 border-b-2 border-blue-600"
+        class="hover:text-blue-600 pb-1"
+      >
+        Price Intelligence
+      </a>
+      <a
         routerLink="/calendar"
         routerLinkActive="text-blue-600 border-b-2 border-blue-600"
         class="hover:text-blue-600 pb-1"
       >
         Calendar
       </a>
+
 
       <a
         *ngIf="auth.getRole() === 'Manager'"

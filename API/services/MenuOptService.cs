@@ -107,7 +107,8 @@ public class MenuOptService
 
                     marginPercent: marginPercent,
 
-                    currentDemand: itemDemand,
+                    currentDemand:
+                        prediction?.ThisWeek ?? 0,
 
                     predictedDemand: predictedDemand,
 
@@ -120,9 +121,55 @@ public class MenuOptService
                 JsonConvert.DeserializeObject(
                     aiResult
                 )!;
+            
+            string category;
 
-            decimal optimizedPrice =
-                aiData.optimizedPrice;
+            int currentDemand =
+                prediction?.ThisWeek ?? 0;
+
+            if (predictedDemand < currentDemand)
+            {
+                category = "Needs Improvement";
+            }
+            else if (
+                marginPercent > 60 &&
+                trendPercent > 15
+            )
+            {
+                category = "Star Item";
+            }
+            else if (marginPercent > 55)
+            {
+                category = "Premium Item";
+            }
+            else
+            {
+                category = "Popular Item";
+            }
+        
+            string inventoryAction =
+                aiData.inventoryAction != null
+                    ? (string)aiData.inventoryAction
+                    : "Maintain inventory levels";
+
+            decimal optimizedPrice = m.Price;
+
+            if (
+                predictedDemand > currentDemand * 1.10
+            )
+            {
+                optimizedPrice = m.Price * 1.03m;
+            }
+            else if (
+                predictedDemand < currentDemand * 0.95
+            )
+            {
+                optimizedPrice = m.Price * 0.98m;
+            }
+            else
+            {
+                optimizedPrice = m.Price;
+            }
 
             decimal minPrice =
                 m.Price * 0.95m;
@@ -181,7 +228,8 @@ public class MenuOptService
 
                 marginPercent,
 
-                demand = itemDemand,
+                demand =
+                    prediction?.ThisWeek ?? 0,
 
                 predictedDemand = Math.Round(
                     predictedDemand,
@@ -198,20 +246,25 @@ public class MenuOptService
                     0
                 ),
 
-                category =
-                    (string)aiData.category,
+                category = category,
 
                 strategy =
-                    (string)aiData.strategy,
+                    aiData.strategy != null
+                        ? (string)aiData.strategy
+                        : "Maintain current pricing",
 
                 promotion =
-                    (string)aiData.promotion,
+                    aiData.promotion != null
+                        ? (string)aiData.promotion
+                        : "Weekend combo offers",
 
                 priority =
-                    (string)aiData.priority,
+                    aiData.priority != null
+                        ? (string)aiData.priority
+                        : "Medium",
 
                 inventoryAction =
-                    (string)aiData.inventoryAction
+                    inventoryAction
             };
         });
 

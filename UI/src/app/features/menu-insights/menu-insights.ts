@@ -125,13 +125,22 @@ export class MenuInsightsComponent implements OnInit {
 
       next: () => {
 
-        alert('Price updated successfully!');
+        item.currentPrice = item.optimizedPrice;
 
-        this.refreshInsights();
+        item.optimizedPrice = item.currentPrice;
+
+        item.priceChangePercent = 0;
 
         this.loading = false;
 
         this.cdr.detectChanges();
+
+        setTimeout(() => {
+
+          alert('Price updated successfully!');
+
+        }, 100);
+
       },
 
       error: (err) => {

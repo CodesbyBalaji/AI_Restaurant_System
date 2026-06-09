@@ -105,4 +105,44 @@ export class ApiService {
     return this.http.put(`http://localhost:5000/api/menu/${id}/price`, price);
   }
 
+  getMarketSummary() {
+
+  return this.http.get<any[]>(
+    `${this.baseUrl}/priceintelligence/summary`
+  );
+
+}
+
+getCityComparison(dish: string) {
+
+  return this.http.get<any[]>(
+    `${this.baseUrl}/priceintelligence/cities?dish=${dish}`
+  );
+
+}
+
+getPremiumCompetitors(dish: string) {
+
+  return this.http.get<any[]>(
+    `${this.baseUrl}/priceintelligence/premium?dish=${dish}`
+  );
+
+}
+
+getCheapestCompetitors(dish: string) {
+
+  return this.http.get<any[]>(
+    `${this.baseUrl}/priceintelligence/cheapest?dish=${dish}`
+  );
+
+}
+
+getPriceComparison() {
+
+  return this.http.get<any[]>(
+    `${this.baseUrl}/priceintelligence/price-comparison`
+  );
+
+}
+
 }

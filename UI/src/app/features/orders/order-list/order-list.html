@@ -47,6 +47,7 @@
           <th class="p-4">Item</th>
           <th class="p-4">Qty</th>
           <th class="p-4">Price</th>
+          <th class="p-4">Order Date</th>
           <th class="p-4">Status</th>
 
           <th
@@ -75,6 +76,10 @@
 
           <td class="p-4 font-semibold text-blue-600">
             ₹{{ order.totalPrice }}
+          </td>
+
+          <td class="p-4 text-gray-600">
+            {{ order.orderedAt | date:'dd/MM/yyyy hh:mm a' }}
           </td>
 
           <td class="p-4">

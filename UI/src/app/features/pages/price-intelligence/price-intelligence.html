@@ -1,0 +1,335 @@
+<div class="min-h-screen bg-slate-50 p-6">
+
+  <div class="mb-8">
+
+    <div
+      class="bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600
+             rounded-3xl p-8 text-white shadow-xl">
+
+      <div class="flex flex-col lg:flex-row justify-between items-center">
+
+        <div>
+
+          <h1 class="text-4xl font-bold mb-2">
+            Price Intelligence Dashboard
+          </h1>
+
+        </div>
+
+        <div
+          class="mt-5 lg:mt-0 bg-white/20 backdrop-blur-lg px-6 py-4 rounded-2xl">
+
+          <div class="text-sm text-indigo-100">
+            Competitors Tracked
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="bg-white rounded-3xl shadow-lg p-6 mb-8">
+
+  <h2 class="text-xl font-bold mb-4">
+    📊 Your Price vs Market Average
+  </h2>
+
+  <div class="h-96">
+    <canvas #priceComparisonChart></canvas>
+  </div>
+
+</div>
+
+  <div
+    *ngIf="loading"
+    class="bg-white rounded-3xl shadow-lg p-12 text-center">
+
+    <div class="animate-spin text-5xl mb-4">
+      ⚙️
+    </div>
+
+    <p class="text-gray-500 text-lg">
+      Loading market intelligence...
+    </p>
+
+  </div>
+
+  <div *ngIf="!loading">
+
+    <div
+      class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-6 mb-8">
+
+      <div
+        *ngFor="let item of summary"
+        (click)="selectDish(item.dish)"
+
+        [ngClass]="{
+            'ring-4 ring-blue-400 bg-blue-50 scale-105':
+            selectedDish === item.dish
+        }"
+
+        class="bg-white
+                rounded-2xl
+                shadow
+                p-5
+                cursor-pointer
+                transition-all
+                duration-300">
+
+        <div class="flex justify-between items-start">
+
+          <div>
+
+            <div class="text-4xl">
+              {{ getDishEmoji(item.dish) }}
+            </div>
+
+            <h3 class="font-semibold text-gray-700 mt-4">
+              {{ item.dish }}
+            </h3>
+
+          </div>
+
+          <span
+            class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-medium">
+
+            Market Avg
+
+          </span>
+
+        </div>
+
+        <div class="mt-5">
+
+          <div class="text-3xl font-bold text-indigo-600">
+            ₹{{ item.averagePrice }}
+          </div>
+
+          <div class="text-gray-500 text-sm mt-2">
+
+            {{ item.competitorCount }} competitors tracked
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div
+  class="mb-6
+         bg-gradient-to-r
+         from-blue-600
+         to-indigo-600
+         text-white
+         rounded-2xl
+         p-5">
+
+  <div class="text-sm opacity-80">
+
+    Currently Analyzing
+
+  </div>
+
+  <div class="text-2xl font-bold mt-1">
+
+    {{ getDishEmoji(selectedDish) }}
+    {{ selectedDish }}
+
+  </div>
+
+</div>
+
+    <div
+      class="bg-white rounded-3xl p-8 shadow-md mb-8">
+
+      <div class="flex items-center justify-between mb-6">
+
+        <h2 class="text-2xl font-bold text-gray-800">
+          City Pricing Analysis
+        </h2>
+
+        <span
+          class="bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm">
+
+          Tamil Nadu Market
+
+        </span>
+
+      </div>
+
+      <div
+        *ngFor="let city of cityComparison"
+        class="mb-5">
+
+        <div class="flex justify-between mb-2">
+
+          <span class="font-medium text-gray-700">
+            {{ city.city }}
+          </span>
+
+          <span class="font-bold text-indigo-600">
+            ₹{{ city.averagePrice }}
+          </span>
+
+        </div>
+
+        <div
+          class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div
+      class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+
+      <div
+        class="bg-white rounded-3xl shadow-md p-6">
+
+        <div class="flex items-center justify-between mb-6">
+
+          <h2 class="text-xl font-bold text-gray-800">
+            Premium Competitors
+          </h2>
+
+          <span
+            class="bg-red-100 text-red-600 px-4 py-2 rounded-full text-sm">
+
+            High Price Segment
+
+          </span>
+
+        </div>
+
+        <div
+          *ngFor="let item of premiumCompetitors"
+          class="border rounded-2xl p-4 mb-4 hover:bg-slate-50">
+
+          <div class="flex justify-between">
+
+            <div>
+
+              <h3 class="font-semibold">
+                {{ item.restaurant }}
+              </h3>
+
+              <p class="text-gray-500 text-sm">
+                {{ item.city }}
+              </p>
+
+            </div>
+
+            <div
+              class="text-red-500 font-bold text-lg">
+
+              ₹{{ item.averagePrice }}
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <div
+        class="bg-white rounded-3xl shadow-md p-6">
+
+        <div class="flex items-center justify-between mb-6">
+
+          <h2 class="text-xl font-bold text-gray-800">
+            Affordable Competitors
+          </h2>
+
+          <span
+            class="bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm">
+
+            Value Segment
+
+          </span>
+
+        </div>
+
+        <div
+          *ngFor="let item of cheapestCompetitors"
+          class="border rounded-2xl p-4 mb-4 hover:bg-slate-50">
+
+          <div class="flex justify-between">
+
+            <div>
+
+              <h3 class="font-semibold">
+                {{ item.restaurant }}
+              </h3>
+
+              <p class="text-gray-500 text-sm">
+                {{ item.city }}
+              </p>
+
+            </div>
+
+            <div
+              class="text-green-600 font-bold text-lg">
+
+              ₹{{ item.averagePrice }}
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div
+      class="bg-gradient-to-r
+             from-slate-900
+             via-indigo-900
+             to-slate-900
+             rounded-3xl
+             p-8
+             text-white
+             shadow-2xl">
+
+      <div class="flex items-center gap-3 mb-4">
+
+        <div>
+
+          <h2 class="text-2xl font-bold">
+            Pricing Recommendation
+          </h2>
+
+          <p class="text-indigo-200">
+            Generated from competitor intelligence
+          </p>
+
+        </div>
+
+      </div>
+
+      <div
+        class="bg-white/10 backdrop-blur-lg rounded-2xl p-6">
+
+        <p
+          class="text-lg leading-relaxed text-slate-100">
+
+          {{ pricingInsight }}
+
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

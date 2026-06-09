@@ -74,25 +74,25 @@ JSON FORMAT:
 }}
 
 RULES:
+
 - optimizedPrice must be realistic
+
 - max increase 8%
 - max decrease 5%
-- short responses only
-- no explanations
-- no markdown
-- no extra text
-- valid JSON only
 
-CATEGORY OPTIONS:
-Star Item
-Popular Item
-Premium Item
-Needs Improvement
+- If predictedDemand is within 10% of currentDemand,
+  keep currentPrice.
 
-PRIORITY OPTIONS:
-High
-Medium
-Low
+- Only increase price when:
+  trendPercent > 15
+  AND predictedDemand > currentDemand
+
+- If predictedDemand is lower than currentDemand,
+  keep currentPrice or reduce slightly.
+
+- Avoid recommending the maximum increase unless demand growth is exceptional.
+
+- Return concise values only.
 
 ";
 
@@ -104,15 +104,12 @@ Low
 
             stream = false,
 
+            format = "json",
+
             options = new
             {
-                temperature = 0.2,
-
-                top_p = 0.2,
-
-                top_k = 10,
-
-                num_predict = 120
+                temperature = 0.1,
+                num_predict = 300
             }
         };
 

@@ -1,26 +1,20 @@
 import pandas as pd
 from sqlalchemy import create_engine
 
-DB_USER ="root"
-DB_PASSWORD ="balaji900"
-DB_HOST ="localhost"
-DB_NAME ="restaurantdb"
-
 engine =create_engine (
-f"mysql+pymysql://{DB_USER }:{DB_PASSWORD }@{DB_HOST }/{DB_NAME }"
+"mysql+pymysql://root:balaji900@localhost/restaurantdb"
 )
 
-query ="""
-SELECT
-    DATE(OrderedAt) as OrderDate,
-    SUM(Quantity) as TotalQuantity
-FROM Orders
-WHERE MenuItemId = 1
-GROUP BY DATE(OrderedAt)
-ORDER BY OrderDate DESC
-LIMIT 30
-"""
+df =pd .read_csv (
+"/Users/balajia/Downloads/tamil_nadu_competitor_prices_normalized.csv"
+)
 
-df =pd .read_sql (query ,engine )
+df .to_sql (
+"CompetitorPrices",
+con =engine ,
+if_exists ="append",
+index =False ,
+chunksize =1000
+)
 
-print (df .to_string ())
+print (f"Imported {len (df )} rows successfully")
