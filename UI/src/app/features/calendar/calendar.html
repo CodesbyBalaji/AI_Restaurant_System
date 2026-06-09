@@ -1,0 +1,209 @@
+<div
+  class="festival-page"
+  [style.--festival-bg]="'url(' + activeTheme.bgImage + ')'"
+  [style.--festival-overlay]="activeTheme.surface"
+  [style.--festival-accent]="activeTheme.accent"
+  [style.--festival-accent-soft]="activeTheme.accentSoft"
+  [style.--festival-accent-strong]="activeTheme.accentStrong"
+  [style.--festival-chip-bg]="activeTheme.chipBg"
+  [style.--festival-chip-border]="activeTheme.chipBorder"
+  [style.--festival-card-glow]="activeTheme.cardGlow"
+  [style.--festival-text-glow]="activeTheme.textGlow"
+>
+  <div class="festival-bg"></div>
+  <div class="festival-overlay"></div>
+  <div class="festival-noise"></div>
+
+  <div class="festival-content">
+    <section class="hero-panel glass-card">
+      <div class="hero-left">
+        <div class="hero-badge">
+          <span class="hero-badge-icon">{{ activeTheme.icon }}</span>
+        </div>
+        <h1 class="hero-title">Festival Intelligence Calendar</h1>
+      </div>
+
+      <div class="hero-right">
+        <div class="mood-card">
+          <div class="mood-label">Current Festival Mood</div>
+          <div class="mood-title">{{ activeTheme.mood }}</div>
+          <p class="mood-text">{{ activeTheme.insight }}</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="calendar-panel glass-card">
+      <div class="section-head">
+        <div>
+          <h2>Festival Calendar</h2>
+          <p>Click any festival to view last year sales, predicted demand, and AI planning insight.</p>
+        </div>
+        <div class="section-chip">Interactive View</div>
+      </div>
+
+      <full-calendar [options]="calendarOptions">
+        <ng-template #eventContent let-arg>
+          <div class="festival-event-pill">
+            <span class="festival-event-title">{{ arg.event.title }}</span>
+          </div>
+        </ng-template>
+      </full-calendar>
+    </section>
+
+    <section *ngIf="loading" class="loading-panel glass-card">
+      <div class="loader-ring"></div>
+      <h3>Loading Festival Intelligence</h3>
+      <p>Analyzing past demand, current prediction, and operational recommendations.</p>
+    </section>
+
+    <section *ngIf="selectedFestival && !loading" class="analytics-wrap">
+      <div class="festival-hero glass-card">
+        <div class="festival-hero-left">
+          <div class="festival-mini-badge">
+            <span>{{ activeTheme.icon }}</span>
+            <span>{{ selectedFestival.crowdTag }}</span>
+          </div>
+
+          <h2 class="festival-title">{{ selectedFestival.title }}</h2>
+          <p class="festival-date">{{ formatDate(selectedFestival.date) }}</p>
+          <p class="festival-summary">{{ activeTheme.insight }}</p>
+        </div>
+
+        <div class="festival-hero-right">
+          <div class="festival-highlight">
+            <div class="festival-highlight-text">{{ selectedFestival.recommendation }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card glass-card">
+          <div class="kpi-label">Last Year Total</div>
+          <div class="kpi-value">{{ selectedFestival.lastYearTotalSales }}</div>
+          <div class="kpi-foot">Historical demand on same festival day</div>
+        </div>
+
+        <div class="kpi-card glass-card">
+          <div class="kpi-label">Predicted This Year</div>
+          <div class="kpi-value">{{ selectedFestival.predictedTotalSales }}</div>
+          <div class="kpi-foot">Estimated orders expected this year</div>
+        </div>
+
+        <div class="kpi-card glass-card">
+          <div class="kpi-label">Overall Growth</div>
+          <div class="kpi-value">{{ selectedFestival.overallGrowthPercent }}%</div>
+          <div class="kpi-foot">Expected change in total sales</div>
+        </div>
+
+        <div class="kpi-card glass-card">
+          <div class="kpi-label">Top Predicted Dish</div>
+          <div class="kpi-value small">{{ selectedFestival.topPredictedDish }}</div>
+          <div class="kpi-foot">Highest expected demand this festival</div>
+        </div>
+      </div>
+
+      <div class="insight-grid">
+        <div class="insight-card glass-card">
+          <div class="insight-card-head">
+            <h3>Operational Priorities</h3>
+            <span class="section-chip">Action Plan</span>
+          </div>
+
+          <div class="priority-list">
+            <div class="priority-item" *ngFor="let advice of selectedFestival.operationalAdvice; let i = index">
+              <div class="priority-index">0{{ i + 1 }}</div>
+              <div class="priority-text">{{ advice }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="insight-card glass-card">
+          <div class="insight-card-head">
+            <h3>Festival Snapshot</h3>
+            <span class="section-chip">Quick Insight</span>
+          </div>
+
+          <div class="snapshot-grid">
+            <div class="snapshot-item">
+              <span class="snapshot-label">Top Historical Dish</span>
+              <span class="snapshot-value">{{ selectedFestival.topHistoricalDish }}</span>
+            </div>
+            <div class="snapshot-item">
+              <span class="snapshot-label">Top Predicted Dish</span>
+              <span class="snapshot-value">{{ selectedFestival.topPredictedDish }}</span>
+            </div>
+            <div class="snapshot-item">
+              <span class="snapshot-label">Traffic Signal</span>
+              <span class="snapshot-value">{{ selectedFestival.crowdTag }}</span>
+            </div>
+            <div class="snapshot-item">
+              <span class="snapshot-label">Planning Focus</span>
+              <span class="snapshot-value">Inventory + Staffing</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dishes-header">
+        <div>
+          <h3>Dish-Level Festival Forecast</h3>
+          <p>Compare historical sales, predicted sales, growth trend, and action recommendation.</p>
+        </div>
+      </div>
+
+      <div class="dish-grid">
+        <div
+          *ngFor="let item of selectedFestival.items; trackBy: trackByDish"
+          class="dish-card glass-card"
+        >
+          <div class="dish-card-top">
+            <div class="dish-rank">#{{ item.rank }}</div>
+            <div class="growth-pill" [ngClass]="getGrowthColor(item.growthPercent)">
+              <span>{{ item.growthPercent >= 0 ? '▲' : '▼' }}</span>
+              <span>{{ item.growthPercent }}%</span>
+            </div>
+          </div>
+
+          <div class="dish-name">{{ item.dishName }}</div>
+
+          <div class="dish-stats">
+            <div class="stat-row">
+              <span>Last Year Sales</span>
+              <strong>{{ item.lastYearSales }}</strong>
+            </div>
+            <div class="stat-row">
+              <span>Predicted This Year</span>
+              <strong>{{ item.predictedSales }}</strong>
+            </div>
+            <div class="stat-row">
+              <span>Expected Growth</span>
+              <strong>{{ item.growthPercent }}%</strong>
+            </div>
+          </div>
+
+          <div class="progress-block">
+            <div class="progress-label-row">
+              <span>Demand Share</span>
+              <span>
+                {{ getProgressWidth(item.predictedSales, selectedFestival.predictedTotalSales) | number:'1.0-0' }}%
+              </span>
+            </div>
+            <div class="progress-track">
+              <div
+                class="progress-fill"
+                [style.width.%]="getProgressWidth(item.predictedSales, selectedFestival.predictedTotalSales)"
+              ></div>
+            </div>
+          </div>
+
+          <div class="recommendation-box">
+            <div class="recommendation-title">Recommendation</div>
+            <div class="recommendation-text">
+              {{ getRecommendation(item.growthPercent) }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>

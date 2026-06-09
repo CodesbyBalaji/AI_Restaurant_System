@@ -14,7 +14,7 @@ namespace API.Migrations
     [Migration("20260409055924_InitialCreate")]
     partial class InitialCreate
     {
-        
+
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618

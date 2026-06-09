@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { tap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -8,6 +9,10 @@ import { Observable } from 'rxjs';
 export class ApiService {
 
   private baseUrl = 'http://localhost:5000/api';
+  private dashboardCache: any = null;
+  private demandPredictionCache: any = null;
+  private aiSummaryCache: any = null;
+  private menuInsightsCache: any = null;
 
   constructor(private http: HttpClient) { }
 
@@ -37,14 +42,34 @@ export class ApiService {
     return this.http.get<any>(`${this.baseUrl}/reports/revenue`);
   }
 
-  getDemandPrediction() {
-    return this.http.get<any[]>(`${this.baseUrl}/demand/predict`);
+  getDemandPrediction(forceRefresh = false) {
+
+  if (this.demandPredictionCache && !forceRefresh) {
+    return of(this.demandPredictionCache);
   }
 
-  getAISummary() {
-  return this.http.get<any>(
-    `${this.baseUrl}/insights/summary`
-  );
+  return this.http
+    .get<any[]>(`${this.baseUrl}/demand/predict`)
+    .pipe(
+      tap(data => {
+        this.demandPredictionCache = data;
+      })
+    );
+}
+
+  getAISummary(forceRefresh = false) {
+
+  if (this.aiSummaryCache && !forceRefresh) {
+    return of(this.aiSummaryCache);
+  }
+
+  return this.http
+    .get<any>(`${this.baseUrl}/insights/summary`)
+    .pipe(
+      tap(data => {
+        this.aiSummaryCache = data;
+      })
+    );
 }
 
   deleteOrder(id: number) {
@@ -60,12 +85,64 @@ export class ApiService {
       }
     );
   }
-  getMenuInsights() {
-    return this.http.get<any[]>('http://localhost:5000/api/menu/optimize');
+
+  getMenuInsights(forceRefresh = false) {
+
+  if (this.menuInsightsCache && !forceRefresh) {
+    return of(this.menuInsightsCache);
   }
+
+  return this.http
+    .get<any[]>('http://localhost:5000/api/menu/optimize')
+    .pipe(
+      tap(data => {
+        this.menuInsightsCache = data;
+      })
+    );
+}
 
   updateMenuPrice(id: number, price: number) {
     return this.http.put(`http://localhost:5000/api/menu/${id}/price`, price);
   }
+
+  getMarketSummary() {
+
+  return this.http.get<any[]>(
+    `${this.baseUrl}/priceintelligence/summary`
+  );
+
+}
+
+getCityComparison(dish: string) {
+
+  return this.http.get<any[]>(
+    `${this.baseUrl}/priceintelligence/cities?dish=${dish}`
+  );
+
+}
+
+getPremiumCompetitors(dish: string) {
+
+  return this.http.get<any[]>(
+    `${this.baseUrl}/priceintelligence/premium?dish=${dish}`
+  );
+
+}
+
+getCheapestCompetitors(dish: string) {
+
+  return this.http.get<any[]>(
+    `${this.baseUrl}/priceintelligence/cheapest?dish=${dish}`
+  );
+
+}
+
+getPriceComparison() {
+
+  return this.http.get<any[]>(
+    `${this.baseUrl}/priceintelligence/price-comparison`
+  );
+
+}
 
 }

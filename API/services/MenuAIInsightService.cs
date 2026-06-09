@@ -16,70 +16,83 @@ public class MenuAIInsightService
 
         string dishName,
 
-        decimal price,
+        decimal currentPrice,
 
         decimal costPrice,
 
         decimal marginPercent,
 
-        int demand,
+        int currentDemand,
 
-        decimal demandRatio,
+        double predictedDemand,
 
-        decimal trendPercent,
+        double trendPercent,
 
-        string category,
-
-        decimal performanceScore,
-
-        decimal suggestedPrice,
-
-        string action
+        double confidencePercent
     )
     {
-        
+
         var prompt = $@"
 
-You are an expert restaurant business strategist.
+You are an AI restaurant menu optimization expert.
 
-Analyze this menu item and provide:
+Analyze this restaurant menu item.
 
-Provide ONE concise restaurant business insight.
+Dish Name: {dishName}
 
-Rules:
-- Maximum 25 words
-- No headings
-- No bullet points
-- No formatting
-- One paragraph only
-
-Keep response:
-- professional
-- under 50 words
-- concise
-- business-focused
-
-Menu Item: {dishName}
-
-Current Price: ₹{price}
+Current Price: ₹{currentPrice}
 
 Cost Price: ₹{costPrice}
 
 Profit Margin: {marginPercent}%
 
-Demand: {demand}
+Current Monthly Demand: {currentDemand}
 
-Demand Ratio: {demandRatio}
+Predicted Weekly Demand: {predictedDemand}
 
-Weekly Trend: {trendPercent}%
+Demand Trend: {trendPercent}%
 
-Menu Category: {category}
+Forecast Confidence: {confidencePercent}%
 
-Performance Score: {performanceScore}/100
+Your job:
+- optimize pricing
+- optimize promotions
+- optimize inventory strategy
+- classify menu performance
 
-Suggested Price: ₹{suggestedPrice}
+Return ONLY valid JSON.
 
-Current Recommendation: {action}
+JSON FORMAT:
+
+{{
+  ""optimizedPrice"": number,
+  ""category"": ""string"",
+  ""strategy"": ""string"",
+  ""promotion"": ""string"",
+  ""priority"": ""string"",
+  ""inventoryAction"": ""string""
+}}
+
+RULES:
+
+- optimizedPrice must be realistic
+
+- max increase 8%
+- max decrease 5%
+
+- If predictedDemand is within 10% of currentDemand,
+  keep currentPrice.
+
+- Only increase price when:
+  trendPercent > 15
+  AND predictedDemand > currentDemand
+
+- If predictedDemand is lower than currentDemand,
+  keep currentPrice or reduce slightly.
+
+- Avoid recommending the maximum increase unless demand growth is exceptional.
+
+- Return concise values only.
 
 ";
 
@@ -89,7 +102,15 @@ Current Recommendation: {action}
 
             prompt = prompt,
 
-            stream = false
+            stream = false,
+
+            format = "json",
+
+            options = new
+            {
+                temperature = 0.1,
+                num_predict = 300
+            }
         };
 
         var json = JsonConvert.SerializeObject(payload);
@@ -116,18 +137,38 @@ Current Recommendation: {action}
 
         dynamic data = JsonConvert.DeserializeObject(result)!;
 
-        string insight = data.response;
+        string aiResponse = data.response;
 
-        insight = insight
+        aiResponse = aiResponse
             .Replace("\n", " ")
             .Replace("\r", " ")
             .Trim();
 
-        if (insight.Length > 300)
+        var start = aiResponse.IndexOf("{");
+
+        var end = aiResponse.LastIndexOf("}");
+
+        if (start >= 0 && end >= 0)
         {
-            insight = insight.Substring(0, 300);
+            aiResponse = aiResponse.Substring(
+                start,
+                end - start + 1
+            );
         }
 
-        return insight;
+        if (string.IsNullOrWhiteSpace(aiResponse))
+        {
+            aiResponse = $@"
+{{
+  ""optimizedPrice"": {currentPrice},
+  ""category"": ""Popular Item"",
+  ""strategy"": ""Maintain current pricing"",
+  ""promotion"": ""Weekend combo offers"",
+  ""priority"": ""Medium"",
+  ""inventoryAction"": ""Maintain inventory levels""
+}}";
+        }
+
+        return aiResponse;
     }
 }

@@ -6,12 +6,16 @@ import { DashboardComponent } from './features/dashboard/dashboard';
 import { LoginComponent } from './features/auth/login/login';
 import { authGuard } from './core/guards/auth-guard';
 import { MenuInsightsComponent } from './features/menu-insights/menu-insights';
+import { CalendarComponent } from './features/calendar/calendar';
+import { PriceIntelligenceComponent } from './features/pages/price-intelligence/price-intelligence';
 
 export const routes: Routes = [
-  { path: '', component: DashboardComponent, canActivate: [authGuard] }, 
+  { path: '', component: DashboardComponent, canActivate: [authGuard] },
   { path: 'menu', component: MenuListComponent },
   { path: 'orders', component: OrdersListComponent },
   { path: 'create-order', component: CreateOrderComponent },
   { path: 'login', component: LoginComponent },
-  { path: 'menu-insights', component: MenuInsightsComponent }
+  { path: 'menu-insights', component: MenuInsightsComponent },
+  { path: 'calendar', component: CalendarComponent },
+  { path: 'price-intelligence', component: PriceIntelligenceComponent }
 ];

@@ -33,27 +33,28 @@ Recommendation: {item.Recommendation}
 ";
         }
 
-
         var prompt = $@"
-You are an AI restaurant business analyst.
+You are an AI restaurant analytics assistant.
 
-Analyze the following restaurant demand forecasts.
+Analyze the restaurant demand forecasting data.
 
 Provide:
-1. One overall business insight
-2. Strategic recommendation
+- ONE concise analytical insight
 
-Keep response:
-- professional
-- short
-- under 80 words
-- business-focused
+Rules:
+- Use numbers and percentages
+- Mention demand changes clearly
+- Mention highest growth or risk items
+- Maximum 40 words
+- Professional business tone
+- No bullet points
+- No headings
+- One paragraph only
 
 Forecast Data:
 
 {summary}
 ";
-
 
         var payload = new
         {
@@ -79,13 +80,11 @@ Forecast Data:
 
         response.EnsureSuccessStatusCode();
 
-
         var result = await response.Content.ReadAsStringAsync();
 
         dynamic data = JsonConvert.DeserializeObject(result)!;
 
         string insight = data.response;
-
 
         insight = insight
             .Replace("\n", " ")

@@ -15,7 +15,7 @@ namespace API.Migrations
     [Migration("20260409070124_AddOrdersTable")]
     partial class AddOrdersTable
     {
-        
+
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618

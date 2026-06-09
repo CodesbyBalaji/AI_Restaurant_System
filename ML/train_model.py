@@ -1,16 +1,16 @@
-import pandas as pd 
-import numpy as np 
-import joblib 
+import pandas as pd
+import numpy as np
+import joblib
 
-from sqlalchemy import create_engine 
+from sqlalchemy import create_engine
 
 from sklearn .metrics import (
 mean_absolute_error ,
 mean_absolute_percentage_error ,
-r2_score 
+r2_score
 )
 
-from xgboost import XGBRegressor 
+from xgboost import XGBRegressor
 
 DB_USER ="root"
 DB_PASSWORD ="balaji900"
@@ -39,13 +39,12 @@ models ={}
 
 all_results =[]
 
-feature_columns =None 
-
+feature_columns =None
 
 for item_id in sorted (df ["MenuItemId"].unique ()):
 
     item_df =df [
-    df ["MenuItemId"]==item_id 
+    df ["MenuItemId"]==item_id
     ].copy ()
 
     item_df =item_df .sort_values ("OrderDate")
@@ -57,7 +56,7 @@ for item_id in sorted (df ["MenuItemId"].unique ()):
     )
 
     item_df =(
-    item_df 
+    item_df
     .set_index ("OrderDate")
     .reindex (full_dates )
     .fillna (0 )
@@ -65,13 +64,13 @@ for item_id in sorted (df ["MenuItemId"].unique ()):
     .reset_index ()
     )
 
-    item_df ["MenuItemId"]=item_id 
+    item_df ["MenuItemId"]=item_id
 
     item_df .rename (
     columns ={
     "index":"OrderDate"
     },
-    inplace =True 
+    inplace =True
     )
 
     item_df ["Target"]=(
@@ -81,24 +80,24 @@ for item_id in sorted (df ["MenuItemId"].unique ()):
 
     item_df ["day_of_week"]=(
     item_df ["OrderDate"]
-    .dt .dayofweek 
+    .dt .dayofweek
     )
 
     item_df ["month"]=(
     item_df ["OrderDate"]
-    .dt .month 
+    .dt .month
     )
 
     item_df ["week"]=(
     item_df ["OrderDate"]
     .dt .isocalendar ()
-    .week 
+    .week
     .astype (int )
     )
 
     item_df ["quarter"]=(
     item_df ["OrderDate"]
-    .dt .quarter 
+    .dt .quarter
     )
 
     item_df ["is_weekend"]=(
@@ -109,12 +108,12 @@ for item_id in sorted (df ["MenuItemId"].unique ()):
 
     item_df ["dow_sin"]=np .sin (
     2 *np .pi *
-    item_df ["day_of_week"]/7 
+    item_df ["day_of_week"]/7
     )
 
     item_df ["dow_cos"]=np .cos (
     2 *np .pi *
-    item_df ["day_of_week"]/7 
+    item_df ["day_of_week"]/7
     )
 
     item_df ["lag_1"]=(
@@ -246,7 +245,7 @@ for item_id in sorted (df ["MenuItemId"].unique ()):
 
     colsample_bytree =0.8 ,
 
-    random_state =42 
+    random_state =42
     )
 
     model .fit (X_train ,y_train )
@@ -257,17 +256,17 @@ for item_id in sorted (df ["MenuItemId"].unique ()):
 
     mae =mean_absolute_error (
     y_test ,
-    preds 
+    preds
     )
 
     mape =mean_absolute_percentage_error (
     y_test ,
-    preds 
-    )*100 
+    preds
+    )*100
 
     r2 =r2_score (
     y_test ,
-    preds 
+    preds
     )
 
     print ("\n"+"="*60 )
@@ -301,12 +300,12 @@ for item_id in sorted (df ["MenuItemId"].unique ()):
 
     "MAPE":mape ,
 
-    "R2":r2 
+    "R2":r2
     })
 
-    models [item_id ]=model 
+    models [item_id ]=model
 
-    feature_columns =feature_cols 
+    feature_columns =feature_cols
 
 results_df =pd .DataFrame (all_results )
 

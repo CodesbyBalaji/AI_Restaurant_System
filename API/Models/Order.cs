@@ -8,7 +8,6 @@ public class Order
 
     public int MenuItemId { get; set; }
 
-    
     public MenuItem? MenuItem { get; set; }
 
     public required string MenuItemName { get; set; }

@@ -1,40 +1,78 @@
-<div class="bg-gray-200 p-6 rounded-xl shadow mb-6">
-  <h3 class="text-gray-500">Total Revenue</h3>
-  <p class="text-3xl font-bold text-blue-600">
-    ₹{{ revenue }}
-  </p>
+<div
+  *ngIf="isLoading"
+  class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center"
+>
+  <ng-lottie [options]="loadingOptions" width="260px" height="260px"> </ng-lottie>
+
+  <h2 class="text-white text-3xl font-bold mt-4">AI Analytics Engine</h2>
+
+  <p class="text-gray-300 mt-3 text-lg">Processing sales trends and generating forecasts...</p>
+
+  <div class="mt-5 text-blue-300 text-sm animate-pulse">This may take a few moments</div>
+</div>
+
+<div class="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-100">
+  <div class="flex justify-between items-center">
+    <div>
+      <p class="text-gray-500 text-sm">Total Revenue</p>
+
+      <h2 class="text-4xl font-bold text-green-600 mt-2">₹{{ revenue | number }}</h2>
+    </div>
+
+    <div class="w-16 h-16 rounded-2xl bg-green-100 flex items-center justify-center text-3xl">
+      💰
+    </div>
+  </div>
 </div>
 
 <div
-  class="bg-gradient-to-r from-purple-600 to-indigo-600
-         text-white rounded-2xl shadow-lg p-6 mb-6">
+  class="bg-gradient-to-r from-indigo-700 via-purple-700 to-blue-700 text-white rounded-3xl shadow-xl p-8 mb-8"
+>
+  <div class="flex justify-between items-start">
+    <div>
+      <h2 class="text-2xl font-bold mb-2">AI Business Insight</h2>
 
-  <div class="flex items-center gap-3 mb-3">
+      <p class="text-sm opacity-80">Generated using sales trends, demand forecasts and analytics</p>
+    </div>
 
-    <h2 class="text-2xl font-bold">
-      AI Restaurant Insight
-    </h2>
+    <button
+      (click)="refreshDashboard()"
+      class="group bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-white/20 backdrop-blur-md px-5 py-2.5 rounded-xl flex items-center gap-2 hover:scale-105 hover:shadow-lg transition-all duration-300"
+    >
+      <svg
+        class="w-5 h-5 group-hover:rotate-180 transition-transform duration-700"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M4 4v5h.582M20 20v-5h-.581M5.64 9A8 8 0 0119 6.34M18.36 15A8 8 0 015 17.66"
+        ></path>
+      </svg>
 
+      <span class="font-medium"> Refresh Data </span>
+    </button>
   </div>
 
-  <p class="text-lg leading-relaxed opacity-90">
-
-    {{ aiInsight || 'Generating AI insight...' }}
-
-  </p>
-
+  <div class="mt-6 bg-white/10 backdrop-blur-sm rounded-2xl p-5">
+    <p class="leading-relaxed text-lg">
+      {{ aiInsight || 'Generating AI insight...' }}
+    </p>
+  </div>
 </div>
 
 <div class="bg-white p-6 rounded-2xl shadow mt-4 mb-10">
-
-  <h3 class="mb-4 font-semibold text-center text-lg text-gray-800">
-    📈 Demand Forecast Overview
-  </h3>
+  <h3 class="mb-4 font-semibold text-center text-lg text-gray-800">📈 Demand Forecast Overview</h3>
 
   <div class="flex justify-center gap-6 mb-6 flex-wrap">
     <div *ngFor="let item of demandData" class="text-center">
-      <img [src]="getImageByName(item.dishName)"
-           class="w-12 h-12 rounded-full object-cover mx-auto shadow" />
+      <img
+        [src]="getImageByName(item.dishName)"
+        class="w-12 h-12 rounded-full object-cover mx-auto shadow"
+      />
       <p class="text-xs mt-1 text-gray-600">
         {{ item.dishName }}
       </p>
@@ -44,7 +82,6 @@
   <div class="h-72">
     <canvas #demandChartCanvas></canvas>
   </div>
-
 
   <div class="flex justify-center gap-6 mt-4 text-xs text-gray-500">
     <span class="flex items-center gap-2">
@@ -56,43 +93,38 @@
       Predicted Next Week
     </span>
   </div>
-
 </div>
 
-<h2 class="text-2xl font-bold mt-6 mb-6 text-gray-800">
-   Demand Prediction
-</h2>
+<div class="mb-6">
+  <h2 class="text-2xl font-bold text-gray-800">Demand Prediction Analysis</h2>
+
+  <p class="text-gray-500">Forecasted menu demand for the upcoming week</p>
+</div>
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-
-  <div *ngFor="let item of demandData; let i = index"
-       class="bg-white rounded-2xl shadow-md hover:shadow-xl transition transform hover:-translate-y-1 overflow-hidden">
-
+  <div
+    *ngFor="let item of demandData; let i = index"
+    class="bg-white rounded-3xl border border-gray-100 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 overflow-hidden"
+  >
     <div class="h-40 bg-gray-200">
-      <img [src]="getImageByName(item.dishName)"
-           class="w-full h-full object-cover" />
+      <img [src]="getImageByName(item.dishName)" class="w-full h-full object-cover" />
     </div>
 
     <div class="p-5">
-
       <div class="flex justify-between items-center">
         <h3 class="text-lg font-semibold text-gray-800">
           {{ item.dishName }}
         </h3>
 
-        <span *ngIf="i === 0"
-              class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+        <span *ngIf="i === 0" class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
           🔥 Top
         </span>
       </div>
 
       <div class="mt-3 text-sm text-gray-500 space-y-1">
-
         <div class="flex justify-between">
           <span>This Week</span>
-          <span class="font-medium text-gray-700">
-            {{ item.thisWeek ?? 0 }} orders
-          </span>
+          <span class="font-medium text-gray-700"> {{ item.thisWeek ?? 0 }} orders </span>
         </div>
 
         <div class="flex justify-between">
@@ -108,60 +140,105 @@
             {{ item.twoWeeksAgo ?? 0 }}
           </span>
         </div>
-
       </div>
 
-      <p class="text-blue-600 font-bold mt-3 text-lg">
-        Predicted: {{ item.predictedNextWeek ?? 0 }}
-      </p>
+      <div class="mt-4 p-3 rounded-xl bg-blue-50 border border-blue-100">
+        <p class="text-blue-700 font-bold text-lg">
+          Predicted Demand:
+          {{ item.predictedNextWeek ?? 0 }}
+        </p>
+      </div>
 
       <div class="mt-3 flex justify-between items-center text-sm">
-
-        <span [ngClass]="{
-          'text-green-600': item.trendPercent > 0,
-          'text-red-500': item.trendPercent < -10,
-          'text-yellow-500': item.trendPercent >= -10 && item.trendPercent <= 0
-        }" class="font-semibold">
-
+        <span
+          [ngClass]="{
+            'text-green-600': item.trendPercent > 0,
+            'text-red-500': item.trendPercent < -10,
+            'text-yellow-500': item.trendPercent >= -10 && item.trendPercent <= 0,
+          }"
+          class="font-semibold"
+        >
           {{ getTrendArrow(item.trendPercent) }}
           {{ item.trendPercent ?? 0 }}%
         </span>
 
-        <span class="text-gray-500">
-          🎯 {{ item.confidencePercent ?? 0 }}%
-        </span>
+        <span class="text-gray-500"> 🎯 {{ item.confidencePercent ?? 0 }}% </span>
       </div>
 
       <div class="mt-2">
         <div class="h-2 bg-gray-200 rounded">
-          <div class="h-2 rounded transition-all duration-500"
-               [style.width.%]="item.confidencePercent ?? 0"
-               [style.background-color]="getConfidenceColor(item.confidencePercent)">
-          </div>
+          <div
+            class="h-2 rounded transition-all duration-500"
+            [style.width.%]="item.confidencePercent ?? 0"
+            [style.background-color]="getConfidenceColor(item.confidencePercent)"
+          ></div>
         </div>
         <p class="text-xs text-gray-400 mt-1">Confidence</p>
       </div>
 
       <div class="mt-3">
-        <span class="inline-block text-xs font-semibold px-3 py-1 rounded-full"
-              [ngClass]="{
-                'bg-green-100 text-green-800': item.recommendation === 'Increase stock',
-                'bg-blue-100 text-blue-800': item.recommendation === 'Maintain stock',
-                'bg-yellow-100 text-yellow-800': item.recommendation === 'Monitor closely',
-                'bg-red-100 text-red-800': item.recommendation === 'Consider reducing'
-              }">
+        <span
+          class="inline-block text-xs font-semibold px-3 py-1 rounded-full"
+          [ngClass]="{
+            'bg-green-100 text-green-800': item.recommendation === 'Increase stock',
+            'bg-blue-100 text-blue-800': item.recommendation === 'Maintain stock',
+            'bg-yellow-100 text-yellow-800': item.recommendation === 'Monitor closely',
+            'bg-red-100 text-red-800': item.recommendation === 'Consider reducing',
+          }"
+        >
           {{ item.recommendation }}
         </span>
       </div>
-
     </div>
   </div>
-  
+</div>
+
+<div *ngIf="peakHoursLoaded"
+     class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+
+  <div *ngIf="!peakHoursLoaded"
+     class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+
+  <div class="bg-white rounded-xl shadow p-4 h-28 animate-pulse"></div>
+
+  <div class="bg-white rounded-xl shadow p-4 h-28 animate-pulse"></div>
+
+  <div class="bg-white rounded-xl shadow p-4 h-28 animate-pulse"></div>
 
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+  <div class="bg-white rounded-xl shadow p-4">
+    <div class="text-sm text-gray-500">🔥 Peak Hour</div>
 
+    <div class="text-xl font-bold mt-1">
+      {{ peakHour }}
+    </div>
+
+    <div class="text-blue-600 font-semibold mt-1">{{ peakOrders | number }} Orders</div>
+  </div>
+
+  <div class="bg-white rounded-xl shadow p-4">
+    <div class="text-sm text-gray-500">🍛 Lunch Peak</div>
+
+    <div class="text-xl font-bold mt-1">
+      {{ lunchPeakHour }}
+    </div>
+
+    <div class="text-orange-600 font-semibold mt-1">{{ lunchPeakOrders | number }} Orders</div>
+  </div>
+
+  <div class="bg-white rounded-xl shadow p-4">
+    <div class="text-sm text-gray-500">🌙 Quiet Hour</div>
+
+    <div class="text-xl font-bold mt-1">
+      {{ quietHour }}
+    </div>
+
+    <div class="text-gray-600 font-semibold mt-1">{{ quietOrders | number }} Orders</div>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-10">
   <div class="bg-white p-4 rounded-xl shadow h-64">
     <h3 class="mb-2 font-semibold">Peak Hours</h3>
     <canvas #peakChartCanvas></canvas>
@@ -171,6 +248,4 @@
     <h3 class="mb-2 font-semibold">Top Dishes</h3>
     <canvas #dishChartCanvas></canvas>
   </div>
-
 </div>
-

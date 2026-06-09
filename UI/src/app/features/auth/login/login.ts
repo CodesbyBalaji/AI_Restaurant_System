@@ -24,7 +24,7 @@ export class LoginComponent {
     }).subscribe({
       next: (res: any) => {
         this.auth.saveAuth(res);
-        this.auth.startAutoLogout(); 
+        this.auth.startAutoLogout();
         this.router.navigate(['/']);
       },
       error: (err) => {

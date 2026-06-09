@@ -1,0 +1,681 @@
+:host {
+  display: block;
+}
+
+.festival-page {
+  --festival-bg: none;
+  --festival-overlay: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.88));
+  --festival-accent: #38bdf8;
+  --festival-accent-soft: rgba(56, 189, 248, 0.18);
+  --festival-accent-strong: #0ea5e9;
+  --festival-chip-bg: rgba(255, 255, 255, 0.14);
+  --festival-chip-border: rgba(255, 255, 255, 0.18);
+  --festival-card-glow: 0 12px 30px rgba(0, 0, 0, 0.18);
+  --festival-text-glow: rgba(56, 189, 248, 0.32);
+
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  color: #ffffff;
+  background: #0f172a;
+}
+
+.festival-bg,
+.festival-overlay,
+.festival-noise {
+  position: absolute;
+  inset: 0;
+}
+
+.festival-bg {
+  background-image: var(--festival-bg);
+  background-size: cover;
+  background-position: center;
+  transform: scale(1.05);
+  filter: saturate(1.15) blur(1px);
+  transition: background-image 0.7s ease, transform 0.7s ease;
+}
+
+.festival-overlay {
+  background: var(--festival-overlay);
+  backdrop-filter: blur(3px);
+}
+
+.festival-noise {
+  opacity: 0.1;
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(255,255,255,0.2) 0 1px, transparent 1px),
+    radial-gradient(circle at 80% 30%, rgba(255,255,255,0.15) 0 1px, transparent 1px),
+    radial-gradient(circle at 40% 70%, rgba(255,255,255,0.1) 0 1px, transparent 1px);
+  background-size: 140px 140px;
+  pointer-events: none;
+}
+
+.festival-content {
+  position: relative;
+  z-index: 2;
+  padding: 28px;
+  max-width: 1500px;
+  margin: 0 auto;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: var(--festival-card-glow);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.hero-panel {
+  border-radius: 32px;
+  padding: 32px;
+  display: grid;
+  grid-template-columns: 1.5fr 0.9fr;
+  gap: 28px;
+  align-items: center;
+}
+
+.hero-badge,
+.hero-chip,
+.section-chip,
+.festival-mini-badge,
+.festival-event-pill {
+  border: 1px solid var(--festival-chip-border);
+  background: var(--festival-chip-bg);
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 999px;
+  padding: 10px 16px;
+  font-weight: 600;
+  color: #f8fafc;
+  margin-bottom: 18px;
+}
+
+.hero-badge-icon {
+  font-size: 1.15rem;
+}
+
+.hero-title {
+  font-size: clamp(2.3rem, 4.5vw, 4.4rem);
+  line-height: 1.04;
+  font-weight: 900;
+  margin: 0;
+  letter-spacing: -0.03em;
+  text-shadow: 0 0 24px var(--festival-text-glow);
+}
+
+.hero-subtitle {
+  margin-top: 18px;
+  max-width: 780px;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 1.08rem;
+  line-height: 1.8;
+}
+
+.hero-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.hero-chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 10px 14px;
+  font-size: 0.92rem;
+  color: #f8fafc;
+}
+
+.mood-card {
+  border-radius: 28px;
+  padding: 24px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.08));
+  border: 1px solid rgba(255,255,255,0.14);
+}
+
+.mood-label {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(255,255,255,0.72);
+}
+
+.mood-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-top: 12px;
+  color: #ffffff;
+}
+
+.mood-text {
+  margin-top: 12px;
+  color: rgba(255,255,255,0.82);
+  line-height: 1.75;
+}
+
+.calendar-panel,
+.loading-panel,
+.festival-hero,
+.kpi-card,
+.insight-card,
+.dish-card {
+  border-radius: 28px;
+}
+
+.calendar-panel {
+  margin-top: 24px;
+  padding: 24px;
+}
+
+.section-head,
+.insight-card-head,
+.dishes-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.section-head h2,
+.insight-card-head h3,
+.dishes-header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.section-head p,
+.dishes-header p {
+  margin: 8px 0 0;
+  color: rgba(255,255,255,0.74);
+}
+
+.section-chip {
+  border-radius: 999px;
+  padding: 10px 14px;
+  white-space: nowrap;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.loading-panel {
+  margin-top: 24px;
+  padding: 42px 24px;
+  text-align: center;
+}
+
+.loader-ring {
+  width: 66px;
+  height: 66px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  border: 4px solid rgba(255,255,255,0.18);
+  border-top-color: var(--festival-accent);
+  animation: spin 0.9s linear infinite;
+}
+
+.loading-panel h3 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.loading-panel p {
+  margin-top: 10px;
+  color: rgba(255,255,255,0.76);
+}
+
+.analytics-wrap {
+  margin-top: 24px;
+}
+
+.festival-hero {
+  padding: 28px;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 24px;
+  align-items: center;
+}
+
+.festival-mini-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  margin-bottom: 18px;
+  font-weight: 700;
+}
+
+.festival-title {
+  margin: 0;
+  font-size: clamp(2rem, 3.6vw, 3rem);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.festival-date {
+  margin-top: 10px;
+  color: rgba(255,255,255,0.74);
+  font-size: 1rem;
+}
+
+.festival-summary {
+  margin-top: 14px;
+  max-width: 760px;
+  color: rgba(255,255,255,0.84);
+  line-height: 1.8;
+  font-size: 1.02rem;
+}
+
+.festival-highlight {
+  background: linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.08));
+  border-radius: 24px;
+  padding: 22px;
+  border: 1px solid rgba(255,255,255,0.14);
+}
+
+.festival-highlight-label,
+.recommendation-title,
+.kpi-label,
+.snapshot-label {
+  font-size: 0.84rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(255,255,255,0.68);
+}
+
+.festival-highlight-text {
+  margin-top: 12px;
+  font-size: 1.08rem;
+  line-height: 1.8;
+  font-weight: 600;
+}
+
+.kpi-grid,
+.insight-grid,
+.dish-grid {
+  display: grid;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.kpi-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.kpi-card {
+  padding: 22px;
+}
+
+.kpi-value {
+  margin-top: 12px;
+  font-size: clamp(2rem, 3vw, 2.8rem);
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.kpi-value.small {
+  font-size: clamp(1.3rem, 2vw, 2rem);
+}
+
+.kpi-foot {
+  margin-top: 10px;
+  color: rgba(255,255,255,0.72);
+  line-height: 1.6;
+  font-size: 0.96rem;
+}
+
+.insight-grid {
+  grid-template-columns: 1.2fr 0.8fr;
+}
+
+.insight-card {
+  padding: 24px;
+}
+
+.priority-list {
+  margin-top: 20px;
+  display: grid;
+  gap: 14px;
+}
+
+.priority-item {
+  display: flex;
+  align-items: start;
+  gap: 14px;
+  padding: 14px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.priority-index {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  background: var(--festival-accent-soft);
+  color: #fff;
+}
+
+.priority-text {
+  color: rgba(255,255,255,0.88);
+  line-height: 1.65;
+  padding-top: 5px;
+}
+
+.snapshot-grid {
+  margin-top: 20px;
+  display: grid;
+  gap: 14px;
+}
+
+.snapshot-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.snapshot-value {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.dishes-header {
+  margin-top: 24px;
+  margin-bottom: 2px;
+}
+
+.dish-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.dish-card {
+  padding: 22px;
+  transition: transform 0.28s ease, box-shadow 0.28s ease;
+}
+
+.dish-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.22);
+}
+
+.dish-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.dish-rank {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: var(--festival-accent-soft);
+  border: 1px solid rgba(255,255,255,0.14);
+  font-weight: 900;
+}
+
+.growth-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 0.92rem;
+}
+
+.growth-pill.positive {
+  background: rgba(34, 197, 94, 0.18);
+  color: #bbf7d0;
+  border: 1px solid rgba(34, 197, 94, 0.24);
+}
+
+.growth-pill.negative {
+  background: rgba(239, 68, 68, 0.18);
+  color: #fecaca;
+  border: 1px solid rgba(239, 68, 68, 0.24);
+}
+
+.growth-pill.neutral {
+  background: rgba(250, 204, 21, 0.18);
+  color: #fde68a;
+  border: 1px solid rgba(250, 204, 21, 0.24);
+}
+
+.dish-name {
+  margin-top: 18px;
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.dish-stats {
+  margin-top: 18px;
+  display: grid;
+  gap: 12px;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  color: rgba(255,255,255,0.84);
+  font-size: 0.98rem;
+}
+
+.stat-row strong {
+  color: #ffffff;
+  font-size: 1rem;
+}
+
+.progress-block {
+  margin-top: 20px;
+}
+
+.progress-label-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.92rem;
+  color: rgba(255,255,255,0.78);
+  margin-bottom: 10px;
+}
+
+.progress-track {
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.10);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--festival-accent), var(--festival-accent-strong));
+  box-shadow: 0 0 20px var(--festival-text-glow);
+}
+
+.recommendation-box {
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+.recommendation-text {
+  margin-top: 10px;
+  color: rgba(255,255,255,0.88);
+  line-height: 1.7;
+  font-weight: 600;
+}
+
+.festival-event-pill {
+  border-radius: 999px;
+  padding: 3px 8px;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.festival-event-title {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+::ng-deep .fc {
+  color: #fff;
+}
+
+::ng-deep .fc .fc-toolbar-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+::ng-deep .fc .fc-button {
+  background: rgba(255,255,255,0.10) !important;
+  border: 1px solid rgba(255,255,255,0.14) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+  border-radius: 14px !important;
+  text-transform: capitalize;
+}
+
+::ng-deep .fc .fc-button:hover,
+::ng-deep .fc .fc-button:focus {
+  background: var(--festival-accent-soft) !important;
+  border-color: rgba(255,255,255,0.18) !important;
+}
+
+::ng-deep .fc-theme-standard td,
+::ng-deep .fc-theme-standard th,
+::ng-deep .fc-theme-standard .fc-scrollgrid {
+  border-color: rgba(255,255,255,0.10) !important;
+}
+
+::ng-deep .fc-col-header-cell-cushion,
+::ng-deep .fc-daygrid-day-number {
+  color: rgba(255,255,255,0.86);
+  text-decoration: none !important;
+}
+
+::ng-deep .fc-daygrid-day.fc-day-today {
+  background: rgba(255,255,255,0.06) !important;
+}
+
+::ng-deep .fc-event {
+  border: none !important;
+  background: transparent !important;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1200px) {
+  .hero-panel,
+  .festival-hero,
+  .insight-grid,
+  .dish-grid,
+  .kpi-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .dish-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .festival-content {
+    padding: 18px;
+  }
+
+  .hero-panel,
+  .festival-hero,
+  .insight-grid,
+  .kpi-grid,
+  .dish-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-panel,
+  .calendar-panel,
+  .festival-hero,
+  .insight-card,
+  .kpi-card,
+  .dish-card {
+    padding: 20px;
+    border-radius: 24px;
+  }
+
+  .section-head,
+  .insight-card-head,
+  .dishes-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hero-title {
+    font-size: clamp(2rem, 9vw, 3rem);
+  }
+
+  .dish-name {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .festival-content {
+    padding: 14px;
+  }
+
+  .hero-badge,
+  .hero-chip,
+  .section-chip,
+  .festival-mini-badge {
+    font-size: 0.82rem;
+  }
+
+  .hero-subtitle,
+  .festival-summary,
+  .mood-text,
+  .festival-highlight-text,
+  .recommendation-text {
+    font-size: 0.95rem;
+  }
+
+  .kpi-value {
+    font-size: 1.9rem;
+  }
+}

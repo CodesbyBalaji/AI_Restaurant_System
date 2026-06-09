@@ -18,7 +18,7 @@ export class CreateOrderComponent implements OnInit {
 
   constructor(
     private api: ApiService,
-    public auth: AuthService 
+    public auth: AuthService
   ) {}
 
   ngOnInit() {

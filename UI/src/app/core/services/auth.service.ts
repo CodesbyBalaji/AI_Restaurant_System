@@ -17,7 +17,7 @@ export class AuthService {
     sessionStorage.setItem('role', res.role);
     sessionStorage.setItem('username', res.username);
 
-    this.startAutoLogout(); 
+    this.startAutoLogout();
   }
 
   getToken() {
@@ -34,7 +34,7 @@ export class AuthService {
 
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.exp * 1000; 
+      return payload.exp * 1000;
     } catch {
       return null;
     }

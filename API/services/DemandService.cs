@@ -6,32 +6,24 @@ namespace API.Services;
 public class DemandForecast
 {
     public required string DishName { get; init; }
-
     public int ThisWeek { get; init; }
-
     public int LastWeek { get; init; }
-
     public int TwoWeeksAgo { get; init; }
-
     public double TrendPercent { get; init; }
-
     public int PredictedNextWeek { get; init; }
-
+    public double ForecastChangePercent { get; init; }
     public int ConfidencePercent { get; init; }
-
+    public int LowerBound { get; init; }
+    public int UpperBound { get; init; }
     public required string Recommendation { get; init; }
-
     public required string ForecastSource { get; init; }
-
     public required string AIInsight { get; init; }
 }
 
 public class DemandService
 {
     private readonly AppDbContext _context;
-
     private readonly MlPredictionService _ml;
-
     private readonly AIInsightService _ai;
 
     public DemandService(
@@ -40,164 +32,110 @@ public class DemandService
         AIInsightService ai)
     {
         _context = context;
+        _ml      = ml;
+        _ai      = ai;
+    }
 
-        _ml = ml;
+    private static string GetRecommendation(
+        double trendPercent,
+        double forecastChangePercent,
+        int    predictedNextWeek,
+        int    confidencePercent)
+    {
 
-        _ai = ai;
+        if (predictedNextWeek < 20)
+            return "Low demand expected — reduce stock";
+
+        if (confidencePercent < 60)
+            return "Forecast uncertain — monitor closely";
+
+        if (trendPercent <= -30)
+            return "Demand declining sharply — reduce stock";
+
+        bool trendFalling  = trendPercent       < -10;
+        bool trendRising   = trendPercent       >  10;
+        bool trendStable   = !trendFalling && !trendRising;
+
+        bool forecastBigUp = forecastChangePercent >= 20;
+        bool forecastUp    = forecastChangePercent is >= 10 and < 20;
+        bool forecastFlat  = forecastChangePercent is >= -5 and < 10;
+        bool forecastDown  = forecastChangePercent is >= -15 and < -5;
+        bool forecastBigDn = forecastChangePercent < -15;
+
+        if (trendFalling && forecastBigUp)
+            return "Trend declining but spike predicted — monitor closely";
+
+        if (trendRising && forecastBigDn)
+            return "Trend rising but drop predicted — monitor closely";
+
+        if (trendRising  && forecastBigUp) return "Strong increase expected — increase stock";
+        if (trendRising  && forecastUp)    return "Increase stock";
+        if (trendFalling && forecastDown)  return "Reduce stock — demand falling";
+        if (trendFalling && forecastBigDn) return "Reduce stock — demand falling";
+
+        if (forecastBigUp) return "Increase stock";
+        if (forecastUp)    return "Increase stock";
+        if (forecastBigDn) return "Consider reducing stock";
+        if (forecastDown)  return "Monitor closely";
+
+        return "Stable demand — maintain stock";
     }
 
     public async Task<List<DemandForecast>>
-        PredictDemandAsync(
-        CancellationToken ct = default)
+        PredictDemandAsync(CancellationToken ct = default)
     {
-
-        var latestDate = await _context.Orders
-            .MaxAsync(o => o.OrderedAt, ct);
-
-        var endDate = latestDate.Date.AddDays(1);
-
-        var thisWeekStart = endDate.AddDays(-7);
-
-        var lastWeekStart = endDate.AddDays(-14);
-
-        var twoWeeksStart = endDate.AddDays(-21);
-
-        var data = await _context.MenuItems
-            .Select(m => new
-            {
-                m.Id,
-
-                DishName = m.Name,
-
-                ThisWeek = m.Orders
-                    .Where(o =>
-                        o.OrderedAt >= thisWeekStart &&
-                        o.OrderedAt < endDate)
-                    .Sum(o => (int?)o.Quantity) ?? 0,
-
-                LastWeek = m.Orders
-                    .Where(o =>
-                        o.OrderedAt >= lastWeekStart &&
-                        o.OrderedAt < thisWeekStart)
-                    .Sum(o => (int?)o.Quantity) ?? 0,
-
-                TwoWeeksAgo = m.Orders
-                    .Where(o =>
-                        o.OrderedAt >= twoWeeksStart &&
-                        o.OrderedAt < lastWeekStart)
-                    .Sum(o => (int?)o.Quantity) ?? 0
-            })
-            .Where(x =>
-                x.ThisWeek > 0 ||
-                x.LastWeek > 0 ||
-                x.TwoWeeksAgo > 0)
+        var activeItemIds = await _context.MenuItems
+            .Where(m => m.Orders.Any())
+            .Select(m => new { m.Id, DishName = m.Name })
             .ToListAsync(ct);
 
-        if (data.Count == 0)
+        if (activeItemIds.Count == 0)
             return [];
 
-        var itemIds = data
-            .Select(d => d.Id)
-            .ToList();
+        var itemIds  = activeItemIds.Select(d => d.Id).ToList();
+        var nameById = activeItemIds.ToDictionary(d => d.Id, d => d.DishName);
 
-        var mlResults = await _ml
-            .PredictBatchAsync(itemIds, ct);
+        var mlResults = await _ml.PredictBatchAsync(itemIds, ct);
 
-        var tasks = data.Select(async d =>
+        if (mlResults.Count == 0)
+            return [];
+
+        var forecasts = mlResults.Values.Select(ml =>
         {
-            mlResults.TryGetValue(
-                d.Id,
-                out var mlResult
-            );
+            string dishName = nameById.TryGetValue(
+                ml.MenuItemId, out var name) ? name : $"Item {ml.MenuItemId}";
 
-            if (mlResult is null)
-            {
-                return new DemandForecast
-                {
-                    DishName = d.DishName,
+            int    predictedNextWeek     = (int)Math.Round(ml.PredictedDemand);
+            double trendPercent          = Math.Round(ml.TrendPercent, 1);
+            double forecastChangePercent = Math.Round(ml.ForecastChangePercent, 1);
+            int    confidencePercent     = (int)Math.Round(ml.ConfidencePercent);
 
-                    ThisWeek = d.ThisWeek,
-
-                    LastWeek = d.LastWeek,
-
-                    TwoWeeksAgo = d.TwoWeeksAgo,
-
-                    TrendPercent = 0,
-
-                    PredictedNextWeek = 0,
-
-                    ConfidencePercent = 0,
-
-                    Recommendation = "No prediction available",
-
-                    ForecastSource = "Unavailable",
-
-                    AIInsight = "Prediction model unavailable"
-                };
-            }
-
-            int predictedNextWeek =
-                (int)Math.Round(
-                    mlResult.PredictedDemand
-                );
-
-            double trendPercent =
-                Math.Round(
-                    mlResult.TrendPercent,
-                    1
-                );
-
-            int confidencePercent =
-                (int)Math.Round(
-                    mlResult.ConfidencePercent
-                );
-
-            string recommendation =
-                trendPercent switch
-                {
-                    >= 20 => "Strong increase expected",
-
-                    >= 10 => "Increase stock",
-
-                    >= 0 => "Maintain stock",
-
-                    >= -10 => "Monitor closely",
-
-                    >= -20 => "Reduce stock slightly",
-
-                    _ => "Consider reducing"
-                };
+            string recommendation = GetRecommendation(
+                trendPercent,
+                forecastChangePercent,
+                predictedNextWeek,
+                confidencePercent);
 
             return new DemandForecast
             {
-                DishName = d.DishName,
-
-                ThisWeek = d.ThisWeek,
-
-                LastWeek = d.LastWeek,
-
-                TwoWeeksAgo = d.TwoWeeksAgo,
-
-                TrendPercent = trendPercent,
-
-                PredictedNextWeek = predictedNextWeek,
-
-                ConfidencePercent = confidencePercent,
-
-                Recommendation = recommendation,
-
-                ForecastSource = "Prophet",
-
-                AIInsight = ""
+                DishName              = dishName,
+                ThisWeek              = ml.ThisWeek,
+                LastWeek              = ml.LastWeek,
+                TwoWeeksAgo           = ml.TwoWeeksAgo,
+                TrendPercent          = trendPercent,
+                PredictedNextWeek     = predictedNextWeek,
+                ForecastChangePercent = forecastChangePercent,
+                ConfidencePercent     = confidencePercent,
+                LowerBound            = ml.LowerBound,
+                UpperBound            = ml.UpperBound,
+                Recommendation        = recommendation,
+                ForecastSource        = "Prophet",
+                AIInsight             = ""
             };
-
         });
 
-        var forecasts = await Task.WhenAll(tasks);
-
         return forecasts
-            .OrderByDescending(x =>
-                x.PredictedNextWeek)
+            .OrderByDescending(x => x.PredictedNextWeek)
             .Take(5)
             .ToList();
     }

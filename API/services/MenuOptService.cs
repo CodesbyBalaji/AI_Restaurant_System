@@ -1,5 +1,6 @@
 using API.Data;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace API.Services;
 
@@ -9,23 +10,31 @@ public class MenuOptService
 
     private readonly MenuAIInsightService _ai;
 
+    private readonly MlPredictionService _ml;
+
     public MenuOptService(
         AppDbContext context,
-        MenuAIInsightService ai
+        MenuAIInsightService ai,
+        MlPredictionService ml
     )
     {
         _context = context;
 
         _ai = ai;
+
+        _ml = ml;
     }
 
     public async Task<List<object>> GetInsightsAsync()
     {
-
-        var last30Days = DateTime.UtcNow.AddDays(-30);
+        var last7Days = DateTime.UtcNow.AddDays(-7);
 
         var demandData = await _context.Orders
-            .Where(o => o.OrderedAt >= last30Days)
+            .Where(o =>
+                o.OrderedAt >= last7Days
+                &&
+                o.Status != "Cancelled"
+            )
             .GroupBy(o => o.MenuItemId)
             .Select(g => new
             {
@@ -35,38 +44,15 @@ public class MenuOptService
             })
             .ToListAsync();
 
-        var lastWeekStart = DateTime.UtcNow.AddDays(-7);
-
-        var previousWeekStart = DateTime.UtcNow.AddDays(-14);
-
-        var weeklyData = await _context.Orders
-            .Where(o => o.OrderedAt >= previousWeekStart)
-            .GroupBy(o => new
-            {
-                o.MenuItemId,
-
-                Week =
-                    o.OrderedAt >= lastWeekStart
-                    ? "Current"
-                    : "Previous"
-            })
-            .Select(g => new
-            {
-                g.Key.MenuItemId,
-
-                g.Key.Week,
-
-                Total = g.Sum(x => x.Quantity)
-            })
+        var menuItems = await _context.MenuItems
             .ToListAsync();
 
-        var avgDemand = demandData.Any()
+        var itemIds = menuItems
+            .Select(x => x.Id)
+            .ToList();
 
-            ? demandData.Average(x => x.TotalOrders)
-
-            : 1;
-
-        var menuItems = await _context.MenuItems.ToListAsync();
+        var mlResults = await _ml
+            .PredictBatchAsync(itemIds);
 
         var tasks = menuItems.Select(async m =>
         {
@@ -76,159 +62,148 @@ public class MenuOptService
                     d.MenuItemId == m.Id
                 )?.TotalOrders ?? 0;
 
-            decimal margin = m.Price > 0
+            mlResults.TryGetValue(
+                m.Id,
+                out var prediction
+            );
 
-                ? (m.Price - m.CostPrice) / m.Price
+            double predictedDemand =
+                prediction?.PredictedDemand ?? 0;
+
+            double trendPercent =
+                prediction?.TrendPercent ?? 0;
+
+            double confidencePercent =
+                prediction?.ConfidencePercent ?? 50;
+
+            decimal marginPercent =
+                m.Price > 0
+
+                ?
+
+                (
+                    (
+                        m.Price - m.CostPrice
+                    )
+                    /
+                    m.Price
+                ) * 100
 
                 : 0;
 
-            decimal demandRatio = avgDemand > 0
-
-                ? (decimal)itemDemand / (decimal)avgDemand
-
-                : 0;
-
-            var currentWeek = weeklyData
-                .FirstOrDefault(x =>
-                    x.MenuItemId == m.Id &&
-                    x.Week == "Current"
-                )?.Total ?? 0;
-
-            var previousWeek = weeklyData
-                .FirstOrDefault(x =>
-                    x.MenuItemId == m.Id &&
-                    x.Week == "Previous"
-                )?.Total ?? 0;
-
-            decimal trendPercent = 0;
-
-            if (previousWeek > 0)
-            {
-                trendPercent =
-                    ((decimal)(currentWeek - previousWeek)
-                    / previousWeek) * 100;
-
-                trendPercent = Math.Round(
-
-                trendPercent switch
-                {
-                    > 60 => 60,
-                    < -60 => -60,
-                    _ => trendPercent
-                },
-
+            marginPercent = Math.Round(
+                marginPercent,
                 1
             );
-            }
 
+            var aiResult =
+                await _ai.GenerateInsightAsync(
+
+                    dishName: m.Name,
+
+                    currentPrice: m.Price,
+
+                    costPrice: m.CostPrice,
+
+                    marginPercent: marginPercent,
+
+                    currentDemand:
+                        prediction?.ThisWeek ?? 0,
+
+                    predictedDemand: predictedDemand,
+
+                    trendPercent: trendPercent,
+
+                    confidencePercent: confidencePercent
+                );
+
+            dynamic aiData =
+                JsonConvert.DeserializeObject(
+                    aiResult
+                )!;
+            
             string category;
 
-            if (demandRatio >= 1.0m && margin >= 0.4m)
+            int currentDemand =
+                prediction?.ThisWeek ?? 0;
 
-                category = "⭐ Star";
-
-            else if (demandRatio >= 1.0m)
-
-                category = "🔥 Popular";
-
-            else if (margin >= 0.4m)
-
-                category = "💎 Premium";
-
+            if (predictedDemand < currentDemand)
+            {
+                category = "Needs Improvement";
+            }
+            else if (
+                marginPercent > 60 &&
+                trendPercent > 15
+            )
+            {
+                category = "Star Item";
+            }
+            else if (marginPercent > 55)
+            {
+                category = "Premium Item";
+            }
             else
+            {
+                category = "Popular Item";
+            }
+        
+            string inventoryAction =
+                aiData.inventoryAction != null
+                    ? (string)aiData.inventoryAction
+                    : "Maintain inventory levels";
 
-                category = "❌ Weak";
+            decimal optimizedPrice = m.Price;
 
-            decimal demandScore =
+            if (
+                predictedDemand > currentDemand * 1.10
+            )
+            {
+                optimizedPrice = m.Price * 1.03m;
+            }
+            else if (
+                predictedDemand < currentDemand * 0.95
+            )
+            {
+                optimizedPrice = m.Price * 0.98m;
+            }
+            else
+            {
+                optimizedPrice = m.Price;
+            }
 
-            Math.Min(demandRatio * 35m, 35m);
+            decimal minPrice =
+                m.Price * 0.95m;
 
-            decimal marginScore =
+            decimal maxPrice =
+                m.Price * 1.08m;
 
-                margin * 35m;
+            optimizedPrice = Math.Clamp(
 
-            decimal trendScore =
+                optimizedPrice,
 
-                (Math.Abs(trendPercent) / 60m) * 30m;
+                minPrice,
 
-            decimal performanceScore =
-
-                demandScore
-                +
-                marginScore
-                +
-                trendScore;
-
-            performanceScore = Math.Clamp(
-                performanceScore,
-                0,
-                100
+                maxPrice
             );
 
-            string action;
+            optimizedPrice = Math.Round(
+                optimizedPrice,
+                2
+            );
 
-            decimal suggestedPrice = m.Price;
+            decimal priceChangePercent =
 
-            if (demandRatio > 1.3m && margin > 0.4m)
-            {
-                action = "Increase Price";
+                (
+                    (
+                        optimizedPrice - m.Price
+                    )
+                    /
+                    m.Price
+                ) * 100m;
 
-                suggestedPrice = m.Price * 1.10m;
-            }
-            else if (demandRatio < 0.5m)
-            {
-                action = "Reduce Price";
-
-                suggestedPrice = m.Price * 0.92m;
-            }
-            else if (margin < 0.25m)
-            {
-                action = "Review Cost";
-
-                suggestedPrice = m.Price * 1.06m;
-            }
-            else
-            {
-                action = "Keep Price";
-            }
-
-            string aiPriority;
-
-            if (performanceScore >= 65)
-
-                aiPriority = "High Priority";
-
-            else if (performanceScore >= 45)
-
-                aiPriority = "Medium Priority";
-
-            else
-
-                aiPriority = "Low Priority";
-
-            var aiInsight = await _ai.GenerateInsightAsync(
-
-                m.Name,
-
-                m.Price,
-
-                m.CostPrice,
-
-                Math.Round(margin * 100, 1),
-
-                itemDemand,
-
-                Math.Round(demandRatio, 2),
-
-                Math.Round(trendPercent, 1),
-
-                category,
-
-                Math.Round(performanceScore, 1),
-
-                Math.Round(suggestedPrice, 2),
-
-                action
+            priceChangePercent = Math.Round(
+                priceChangePercent,
+                1
             );
 
             return new
@@ -237,51 +212,67 @@ public class MenuOptService
 
                 name = m.Name,
 
-                price = Math.Round(m.Price, 2),
-
-                costPrice = Math.Round(m.CostPrice, 2),
-
-                marginPercent = Math.Round(
-                    margin * 100,
-                    1
-                ),
-
-                demand = itemDemand,
-
-                demandRatio = Math.Round(
-                    demandRatio,
+                currentPrice = Math.Round(
+                    m.Price,
                     2
                 ),
 
-                weeklyTrendPercent = Math.Round(
+                optimizedPrice,
+
+                priceChangePercent,
+
+                costPrice = Math.Round(
+                    m.CostPrice,
+                    2
+                ),
+
+                marginPercent,
+
+                demand =
+                    prediction?.ThisWeek ?? 0,
+
+                predictedDemand = Math.Round(
+                    predictedDemand,
+                    0
+                ),
+
+                trendPercent = Math.Round(
                     trendPercent,
                     1
                 ),
 
-                category,
-
-                performanceScore = Math.Round(
-                    performanceScore,
-                    1
+                confidencePercent = Math.Round(
+                    confidencePercent,
+                    0
                 ),
 
-                suggestedPrice = Math.Round(
-                    suggestedPrice,
-                    2
-                ),
+                category = category,
 
-                action,
+                strategy =
+                    aiData.strategy != null
+                        ? (string)aiData.strategy
+                        : "Maintain current pricing",
 
-                aiInsight,
+                promotion =
+                    aiData.promotion != null
+                        ? (string)aiData.promotion
+                        : "Weekend combo offers",
 
-                aiPriority
+                priority =
+                    aiData.priority != null
+                        ? (string)aiData.priority
+                        : "Medium",
+
+                inventoryAction =
+                    inventoryAction
             };
         });
 
         var result = await Task.WhenAll(tasks);
 
         return result
-            .OrderByDescending(x => x.performanceScore)
+            .OrderByDescending(x =>
+                x.predictedDemand)
             .ToList<object>();
     }
 }

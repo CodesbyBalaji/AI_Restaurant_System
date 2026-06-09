@@ -12,11 +12,11 @@
       "schematics": {
         "@schematics/angular:component": {
           "skipTests": true,
-          "path": "src/features"
+          "path": "src/app/features"
         },
         "@schematics/angular:service": {
           "skipTests": true,
-          "path": "src/core/services"
+          "path": "src/app/core/services"
         },
         "@schematics/angular:guard": {
           "skipTests": true

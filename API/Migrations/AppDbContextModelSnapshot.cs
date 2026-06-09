@@ -22,6 +22,48 @@ namespace API.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
+            modelBuilder.Entity("API.Models.CompetitorPrice", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("CollectedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("DishCategory")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("DishName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<decimal>("MaxPrice")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<decimal>("MinPrice")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<string>("Restaurant")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CompetitorPrices");
+                });
+
             modelBuilder.Entity("API.Models.MenuItem", b =>
                 {
                     b.Property<int>("Id")
