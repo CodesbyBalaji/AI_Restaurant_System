@@ -69,12 +69,13 @@
 
 .hero-panel {
   border-radius: 32px;
-  padding: 32px;
+  padding: 24px;
   display: grid;
   grid-template-columns: 1.5fr 0.9fr;
-  gap: 28px;
+  gap: 24px;
   align-items: center;
 }
+
 
 .hero-badge,
 .hero-chip,
@@ -101,12 +102,12 @@
 }
 
 .hero-title {
-  font-size: clamp(2.3rem, 4.5vw, 4.4rem);
+  font-size: clamp(1.9rem, 4vw, 3rem);
   line-height: 1.04;
   font-weight: 900;
   margin: 0;
   letter-spacing: -0.03em;
-  text-shadow: 0 0 24px var(--festival-text-glow);
+  text-shadow: 0 0 18px var(--festival-text-glow);
 }
 
 .hero-subtitle {
