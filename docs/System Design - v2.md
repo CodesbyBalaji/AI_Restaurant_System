@@ -21,7 +21,7 @@ The **AI Restaurant Demand & Menu Optimization System** is a full-stack, enterpr
 | **AI/ML Engine** | Python (FastAPI) | Predictive time-series server running custom-trained Prophet models. |
 | **LLM Inference** | Ollama (Local Phi-3) | Local LLM running structured JSON generation for pricing, promo strategies, and menu insights. |
 | **Charts** | Chart.js | Visual rendering of peak hours, 30-day revenue trends, and top dish distributions. |
-| **Real-time Comms** | ASP.NET Core SignalR | Bidirectional WebSocket channel for live messaging and online status tracking. |
+| **Real-time Chats** | ASP.NET Core SignalR | Bidirectional WebSocket channel for live messaging and online status tracking. |
 
 ---
 
