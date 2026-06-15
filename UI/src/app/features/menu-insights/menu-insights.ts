@@ -103,6 +103,16 @@ export class MenuInsightsComponent implements OnInit {
       });
   }
 
+  activeTabs: { [key: number]: string } = {};
+
+  setTab(itemId: number, tab: string): void {
+    this.activeTabs[itemId] = tab;
+  }
+
+  getActiveTab(itemId: number): string {
+    return this.activeTabs[itemId] || 'overview';
+  }
+
   apply(item: any): void {
 
     const confirmed = confirm(

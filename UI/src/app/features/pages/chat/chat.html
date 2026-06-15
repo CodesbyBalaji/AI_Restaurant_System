@@ -1,0 +1,219 @@
+<div class="h-screen flex overflow-hidden bg-[#0f171c] text-white">
+
+  <aside class="w-80 shrink-0 bg-[#15100c] border-r border-[#d9a441]/15 flex flex-col shadow-2xl">
+    <div class="px-5 py-5 border-b border-[#d9a441]/15 bg-gradient-to-r from-[#1f1812] to-[#171210]">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-full bg-[#3a2a1d] border border-[#d9a441]/30 flex items-center justify-center text-lg shrink-0">
+          🍽️
+        </div>
+        <div class="min-w-0">
+          <p class="text-[11px] text-[#c9a36a] tracking-wider uppercase mt-0.5">
+            ChatHub
+          </p>
+        </div>
+      </div>
+
+      <p class="text-xs text-gray-400 mt-3">
+        Logged in as <span class="text-[#d9a441] font-medium">{{ username }}</span>
+      </p>
+    </div>
+
+    <div class="px-4 py-3 border-b border-[#d9a441]/10">
+      <div class="relative">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
+        </svg>
+        <input
+          type="text"
+          placeholder="Search conversations..."
+          class="w-full bg-[#1f1812] text-white placeholder:text-gray-500 text-sm rounded-lg pl-9 pr-3 py-2.5 outline-none border border-[#d9a441]/10 focus:border-[#d9a441]/50 focus:ring-2 focus:ring-[#d9a441]/15 transition">
+      </div>
+    </div>
+
+    <div class="flex-1 overflow-y-auto">
+      <div
+        *ngFor="let user of users"
+        (click)="selectUser(user)"
+        class="group flex items-center gap-3 px-4 py-4 cursor-pointer transition-all duration-200 border-b border-[#d9a441]/5 hover:bg-[#221a14]"
+        [class.bg-[#2a1f17]]="selectedUser?.id === user.id"
+        [class.border-l-2]="selectedUser?.id === user.id"
+        [class.border-l-[#d9a441]]="selectedUser?.id === user.id">
+
+        <div class="relative shrink-0">
+          <img
+            [src]="'https://ui-avatars.com/api/?name=' + user.name + '&background=a16207&color=fff&bold=true'"
+            [alt]="user.name"
+            class="w-12 h-12 rounded-full object-cover shadow-md ring-1 ring-[#d9a441]/20">
+
+          <span
+            *ngIf="isOnline(user.id)"
+            class="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-[#15100c] shadow-[0_0_8px_rgba(16,185,129,0.8)]">
+          </span>
+        </div>
+
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between gap-2">
+            <div class="text-white font-medium truncate">
+              {{ user.name }}
+            </div>
+
+            <span
+              *ngIf="isOnline(user.id)"
+              class="text-[10px] uppercase tracking-wider text-emerald-400 font-semibold shrink-0">
+              Online
+            </span>
+          </div>
+
+          <div class="text-xs text-gray-400 truncate mt-1">
+            {{ user.lastMessage || 'Start a conversation' }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <section class="flex-1 flex flex-col relative min-w-0">
+
+    <div class="absolute inset-0 bg-cover bg-center"
+         style="background-image: url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1600&q=80');">
+    </div>
+
+    <div class="absolute inset-0 bg-[#0b141a]/85"></div>
+
+    <div class="absolute inset-0 opacity-90 bg-[radial-gradient(circle_at_top_left,_rgba(217,164,65,0.10),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(120,53,15,0.08),_transparent_24%),radial-gradient(circle_at_bottom_left,_rgba(217,164,65,0.05),_transparent_30%)]"></div>
+
+    <div class="absolute inset-0 opacity-[0.04] bg-[linear-gradient(rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.06)_1px,transparent_1px)] bg-[size:32px_32px]"></div>
+
+    <div
+      *ngIf="selectedUser"
+      class="relative z-10 h-16 bg-[#1f1812]/95 backdrop-blur border-b border-[#d9a441]/15 flex items-center px-5 shadow-md">
+
+      <img
+        [src]="'https://ui-avatars.com/api/?name=' + selectedUser.name + '&background=a16207&color=fff&bold=true'"
+        [alt]="selectedUser.name"
+        class="w-10 h-10 rounded-full object-cover shadow-md ring-1 ring-[#d9a441]/20">
+
+      <div class="ml-3 min-w-0">
+        <div class="text-white font-semibold truncate">
+          {{ selectedUser.name }}
+        </div>
+
+        <div
+          *ngIf="isOnline(selectedUser.id)"
+          class="text-xs text-emerald-400 font-medium mt-0.5 flex items-center gap-1">
+          <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)]"></span>
+          Active now
+        </div>
+
+        <div
+          *ngIf="!isOnline(selectedUser.id)"
+          class="text-xs text-gray-400 mt-0.5">
+          Last seen recently
+        </div>
+      </div>
+    </div>
+
+    <div
+      #scrollContainer
+      class="relative z-10 flex-1 overflow-y-auto px-4 md:px-6 py-5 space-y-1">
+
+      <ng-container *ngIf="messages.length > 0; else emptyState">
+
+        <div
+          *ngFor="let message of messages"
+          class="flex mb-4"
+          [class.justify-end]="isMyMessage(message)"
+          [class.justify-start]="!isMyMessage(message)">
+
+          <div
+            class="max-w-[85%] sm:max-w-[75%] rounded-2xl px-4 py-3 shadow-lg break-words border"
+            [ngClass]="isMyMessage(message)
+              ? 'bg-[#3a2a1d]/90 border-[#d9a441]/30 rounded-br-md'
+              : 'bg-[#1e1a16]/90 border-white/10 rounded-bl-md'">
+
+            <div
+              *ngIf="!isMyMessage(message)"
+              class="text-[11px] font-semibold mb-1 text-[#d9a441]">
+              {{ message.senderId }}
+            </div>
+
+            <div class="text-sm leading-relaxed text-white whitespace-pre-wrap">
+              {{ message.content }}
+            </div>
+
+            <div class="flex items-center justify-between gap-3 mt-2">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="text-[11px] text-white/70">
+                  {{ message.sentAt | date:'shortTime' }}
+                </span>
+
+                <span
+                  *ngIf="isMyMessage(message) && !message.deliveredAt"
+                  class="text-[11px] text-white/70">
+                  ✓
+                </span>
+
+                <span
+                  *ngIf="isMyMessage(message) && message.deliveredAt && !message.readAt"
+                  class="text-[11px] text-white/80">
+                  ✓✓
+                </span>
+
+                <span
+                  *ngIf="isMyMessage(message) && message.readAt"
+                  class="text-[11px] text-sky-400 font-semibold">
+                  ✓✓
+                </span>
+              </div>
+
+              <button
+                *ngIf="isMyMessage(message)"
+                (click)="deleteMessage(message)"
+                type="button"
+                class="text-[11px] text-red-300 hover:text-red-400 transition font-medium">
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-template #emptyState>
+        <div class="h-full flex items-center justify-center">
+          <div class="text-center px-6 py-10 rounded-3xl bg-black/40 backdrop-blur-sm border border-white/10 shadow-2xl max-w-md">
+            <div class="text-7xl mb-4">
+              🍽️
+            </div>
+
+            <div class="text-gray-100 text-xl font-semibold">
+              No messages yet
+            </div>
+
+            <div class="text-gray-300 text-sm mt-2 leading-relaxed">
+              Start a conversation with {{ selectedUser?.name }}
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </div>
+
+
+    <div class="relative z-10 bg-[#1f1812]/95 backdrop-blur border-t border-[#d9a441]/15 px-4 py-4">
+      <div class="flex items-center gap-3">
+        <input
+          [(ngModel)]="messageText"
+          (keyup.enter)="sendMessage()"
+          type="text"
+          placeholder="Type a message..."
+          class="flex-1 bg-[#2a2018] text-white placeholder:text-gray-400 rounded-full px-5 py-3 outline-none border border-[#d9a441]/10 focus:border-[#d9a441] focus:ring-2 focus:ring-[#d9a441]/20 transition">
+
+        <button
+          (click)="sendMessage()"
+          type="button"
+          class="bg-[#a16207] hover:bg-[#854d0e] active:scale-[0.98] transition text-white rounded-full px-6 py-3 font-medium shadow-lg">
+          Send
+        </button>
+      </div>
+    </div>
+  </section>
+</div>

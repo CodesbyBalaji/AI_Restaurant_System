@@ -8,6 +8,7 @@ import { authGuard } from './core/guards/auth-guard';
 import { MenuInsightsComponent } from './features/menu-insights/menu-insights';
 import { CalendarComponent } from './features/calendar/calendar';
 import { PriceIntelligenceComponent } from './features/pages/price-intelligence/price-intelligence';
+import { ChatComponent } from './features/pages/chat/chat';
 
 export const routes: Routes = [
   { path: '', component: DashboardComponent, canActivate: [authGuard] },
@@ -17,5 +18,6 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'menu-insights', component: MenuInsightsComponent },
   { path: 'calendar', component: CalendarComponent },
-  { path: 'price-intelligence', component: PriceIntelligenceComponent }
+  { path: 'price-intelligence', component: PriceIntelligenceComponent },
+  { path: 'chat', component: ChatComponent, canActivate: [authGuard] }
 ];
