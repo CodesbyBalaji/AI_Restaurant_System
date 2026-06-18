@@ -1,13 +1,14 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.SignalR;
 
-namespace API.Helpers
+namespace API.Helpers;
+
+public class NameUserIdProvider : IUserIdProvider
 {
-    public class NameUserIdProvider : IUserIdProvider
+    public string? GetUserId(HubConnectionContext connection)
     {
-        public string? GetUserId(HubConnectionContext connection)
-        {
-            return connection.User?.FindFirst(ClaimTypes.Name)?.Value;
-        }
+        return connection.User?
+            .FindFirst(ClaimTypes.NameIdentifier)?
+            .Value;
     }
 }

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -9,26 +10,21 @@ export class ChatApiService {
 
   constructor(private http: HttpClient) {}
 
-  getConversation(currentUserId: string, otherUserId: string) {
-    return this.http.get(
-      `${this.baseUrl}/conversation?currentUserId=${currentUserId}&otherUserId=${otherUserId}`
-    );
+  getConversation(otherUserId: string): Observable<any> {
+    const params = new HttpParams().set('otherUserId', otherUserId);
+    return this.http.get(`${this.baseUrl}/conversation`, { params });
   }
 
-  markAsRead(messageId: string) {
-    return this.http.post(
-      `${this.baseUrl}/mark-read/${messageId}`,
-      {}
-    );
+  markAsRead(messageId: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/mark-read/${messageId}`, {});
   }
 
-  getLastMessage(currentUserId: string, otherUserId: string) {
-    return this.http.get(
-      `${this.baseUrl}/last-message?currentUserId=${currentUserId}&otherUserId=${otherUserId}`
-    );
+  getLastMessage(otherUserId: string): Observable<any> {
+    const params = new HttpParams().set('otherUserId', otherUserId);
+    return this.http.get(`${this.baseUrl}/last-message`, { params });
   }
 
-  deleteMessage(messageId: string) {
+  deleteMessage(messageId: string): Observable<any> {
     return this.http.delete(`${this.baseUrl}/${messageId}`);
   }
 }

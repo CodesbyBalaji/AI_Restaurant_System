@@ -275,4 +275,8 @@ public class MenuOptService
                 x.predictedDemand)
             .ToList<object>();
     }
+    public async Task<List<object>> GetOptimizedMenuAsync()
+    {
+        return await GetInsightsAsync();
+    }
 }

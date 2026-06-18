@@ -37,8 +37,20 @@ public class AuthController : ControllerBase
 
         var claims = new[]
         {
-            new Claim(ClaimTypes.Name, dto.Username),
-            new Claim(ClaimTypes.Role, role)
+            new Claim(
+                ClaimTypes.NameIdentifier,
+                dto.Username
+            ),
+
+            new Claim(
+                ClaimTypes.Name,
+                dto.Username
+            ),
+
+            new Claim(
+                ClaimTypes.Role,
+                role
+            )
         };
 
         var keyString = _config["Jwt:Key"]

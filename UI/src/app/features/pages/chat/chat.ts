@@ -32,6 +32,8 @@ export interface ChatMessage {
 export class ChatComponent implements OnInit, OnDestroy {
   @ViewChild('scrollContainer') scrollContainer!: ElementRef;
 
+  readonly aiUserId = 'RestaurantAI';
+
   username = '';
   role = '';
   messageText = '';
@@ -39,6 +41,8 @@ export class ChatComponent implements OnInit, OnDestroy {
   onlineUsers: string[] = [];
   messages: ChatMessage[] = [];
   users: any[] = [];
+  aiTyping = false;
+
   private subscriptions: Subscription[] = [];
 
   constructor(
@@ -57,49 +61,81 @@ export class ChatComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (this.role === 'Admin') {
-      this.users = [{ id: 'manager', name: 'Restaurant Manager', lastMessage: '' }];
-    } else {
-      this.users = [{ id: 'admin', name: 'Administrator', lastMessage: '' }];
-    }
+    const humanChat =
+      this.role === 'Admin'
+        ? { id: 'manager', name: 'Restaurant Manager', lastMessage: '', isAI: false }
+        : { id: 'admin', name: 'Administrator', lastMessage: '', isAI: false };
 
+    const aiChat = {
+      id: this.aiUserId,
+      name: 'Restaurant AI',
+      lastMessage: '',
+      isAI: true
+    };
+
+    this.users = [humanChat, aiChat];
     this.selectedUser = this.users[0];
 
     this.chatService.startConnection();
     this.presenceService.startConnection();
 
     this.loadConversation();
-    this.loadLastMessage();
+    this.loadAllLastMessages();
 
     this.subscriptions.push(
       this.chatService.messages$.subscribe((message: ChatMessage | null) => {
         if (!message) return;
 
-        const isCurrentConversation =
-          (message.senderId === this.username && message.receiverId === this.selectedUser.id) ||
-          (message.senderId === this.selectedUser.id && message.receiverId === this.username);
+        const normalizedMessage = this.normalizeMessageDates(message);
 
-        if (!isCurrentConversation) return;
+        this.updateSidebarLastMessage(normalizedMessage);
 
-        const exists = this.messages.some(m => m.id === message.id);
-
-        if (!exists) {
-          this.messages = [...this.messages, message];
-          this.updateLastMessage(message);
-          this.markIncomingMessagesAsRead();
+        if (!this.isMessageForSelectedConversation(normalizedMessage)) {
           this.cdr.detectChanges();
-          setTimeout(() => this.scrollToBottom(), 0);
+          return;
         }
+
+        const existingIndex = this.messages.findIndex(m => m.id === normalizedMessage.id);
+
+        if (existingIndex === -1) {
+          this.messages = [...this.messages, normalizedMessage];
+        } else {
+          const updatedMessages = [...this.messages];
+          updatedMessages[existingIndex] = {
+            ...updatedMessages[existingIndex],
+            ...normalizedMessage
+          };
+          this.messages = updatedMessages;
+        }
+
+        if (
+          normalizedMessage.receiverId?.toLowerCase() === this.username?.toLowerCase() &&
+          !normalizedMessage.readAt
+        ) {
+          this.chatApi.markAsRead(normalizedMessage.id).subscribe({
+            error: err => console.error(err)
+          });
+
+          this.chatService.markAsRead(normalizedMessage.id).catch(err => console.error(err));
+        }
+
+        this.cdr.detectChanges();
+        setTimeout(() => this.scrollToBottom(), 0);
       })
     );
 
     this.subscriptions.push(
       this.chatService.messageDelivered$.subscribe((messageId: string | null) => {
         if (!messageId) return;
-        const msg = this.messages.find(m => m.id === messageId);
-        if (msg) {
-          msg.deliveredAt = new Date().toISOString();
-          this.messages = [...this.messages];
+
+        const index = this.messages.findIndex(m => m.id === messageId);
+        if (index !== -1) {
+          const updatedMessages = [...this.messages];
+          updatedMessages[index] = {
+            ...updatedMessages[index],
+            deliveredAt: new Date().toISOString()
+          };
+          this.messages = updatedMessages;
           this.cdr.detectChanges();
         }
       })
@@ -108,10 +144,15 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.subscriptions.push(
       this.chatService.messageRead$.subscribe((messageId: string | null) => {
         if (!messageId) return;
-        const msg = this.messages.find(m => m.id === messageId);
-        if (msg) {
-          msg.readAt = new Date().toISOString();
-          this.messages = [...this.messages];
+
+        const index = this.messages.findIndex(m => m.id === messageId);
+        if (index !== -1) {
+          const updatedMessages = [...this.messages];
+          updatedMessages[index] = {
+            ...updatedMessages[index],
+            readAt: new Date().toISOString()
+          };
+          this.messages = updatedMessages;
           this.cdr.detectChanges();
         }
       })
@@ -120,6 +161,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.subscriptions.push(
       this.chatService.messageDeleted$.subscribe((messageId: string | null) => {
         if (!messageId) return;
+
         this.messages = this.messages.filter(m => m.id !== messageId);
         this.cdr.detectChanges();
       })
@@ -133,10 +175,18 @@ export class ChatComponent implements OnInit, OnDestroy {
     );
 
     this.subscriptions.push(
+      this.chatService.aiTyping$.subscribe((typing: boolean) => {
+        this.aiTyping = this.selectedUser?.id === this.aiUserId ? typing : false;
+        this.cdr.detectChanges();
+        setTimeout(() => this.scrollToBottom(), 0);
+      })
+    );
+
+    this.subscriptions.push(
       this.chatService.reconnect$.subscribe((ok: boolean) => {
         if (ok) {
           this.loadConversation();
-          this.loadLastMessage();
+          this.loadAllLastMessages();
         }
       })
     );
@@ -148,28 +198,29 @@ export class ChatComponent implements OnInit, OnDestroy {
         }
       })
     );
-
-    document.addEventListener('visibilitychange', this.onVisibilityChange);
   }
 
   ngOnDestroy(): void {
     this.subscriptions.forEach(s => s.unsubscribe());
-    document.removeEventListener('visibilitychange', this.onVisibilityChange);
   }
 
-  onVisibilityChange = () => {
-    if (document.visibilityState === 'visible') {
-      this.loadConversation();
-      this.loadLastMessage();
-    }
-  };
+  private isMessageForSelectedConversation(message: ChatMessage): boolean {
+    if (!this.selectedUser?.id) return false;
+
+    return (
+      (message.senderId === this.username && message.receiverId === this.selectedUser.id) ||
+      (message.senderId === this.selectedUser.id && message.receiverId === this.username)
+    );
+  }
 
   loadConversation() {
     if (!this.username || !this.selectedUser?.id) return;
 
-    this.chatApi.getConversation(this.username, this.selectedUser.id).subscribe({
-      next: (messages: any) => {
-        this.messages = [...(messages || [])];
+    this.aiTyping = false;
+
+    this.chatApi.getConversation(this.selectedUser.id).subscribe({
+      next: (messages: ChatMessage[]) => {
+        this.messages = (messages || []).map(m => this.normalizeMessageDates(m));
         this.markIncomingMessagesAsRead();
         this.cdr.detectChanges();
         setTimeout(() => this.scrollToBottom(), 0);
@@ -178,22 +229,26 @@ export class ChatComponent implements OnInit, OnDestroy {
     });
   }
 
-  loadLastMessage() {
-    if (!this.username || !this.selectedUser?.id) return;
-
-    this.chatApi.getLastMessage(this.username, this.selectedUser.id).subscribe({
-      next: (message: any) => {
-        if (message) {
-          this.selectedUser.lastMessage = message.content;
+  loadAllLastMessages() {
+    this.users.forEach(user => {
+      this.chatApi.getLastMessage(user.id).subscribe({
+        next: (message: ChatMessage | null) => {
+          user.lastMessage = message?.content || '';
           this.cdr.detectChanges();
-        }
-      },
-      error: err => console.error(err)
+        },
+        error: err => console.error(err)
+      });
     });
   }
 
-  updateLastMessage(message: ChatMessage) {
-    this.selectedUser.lastMessage = message.content;
+  updateSidebarLastMessage(message: ChatMessage) {
+    const peerId =
+      message.senderId === this.username ? message.receiverId : message.senderId;
+
+    const user = this.users.find(u => u.id === peerId);
+    if (user) {
+      user.lastMessage = message.content;
+    }
   }
 
   markIncomingMessagesAsRead() {
@@ -204,27 +259,35 @@ export class ChatComponent implements OnInit, OnDestroy {
     );
 
     unreadMessages.forEach(msg => {
-      this.chatApi.markAsRead(msg.id).subscribe();
-      this.chatService.markAsRead(msg.id);
+      this.chatApi.markAsRead(msg.id).subscribe({
+        error: err => console.error(err)
+      });
+
+      this.chatService.markAsRead(msg.id).catch(err => console.error(err));
     });
   }
 
-  sendMessage() {
-    if (!this.messageText.trim()) return;
-
+  async sendMessage() {
     const text = this.messageText.trim();
+    if (!text || !this.selectedUser?.id) return;
 
-    this.chatService.sendMessage(this.selectedUser.id, text)
-      .then(() => {
-        this.messageText = '';
-      })
-      .catch(err => console.error(err));
+    this.messageText = '';
+    this.cdr.detectChanges();
+
+    try {
+      await this.chatService.sendMessage(this.selectedUser.id, text);
+      setTimeout(() => this.scrollToBottom(), 0);
+    } catch (err) {
+      console.error(err);
+      this.messageText = text;
+      this.cdr.detectChanges();
+    }
   }
 
   deleteMessage(message: ChatMessage) {
     this.chatApi.deleteMessage(message.id).subscribe({
       next: () => {
-        this.chatService.deleteMessage(message.id);
+        this.chatService.deleteMessage(message.id).catch(err => console.error(err));
       },
       error: err => {
         console.error(err);
@@ -237,19 +300,49 @@ export class ChatComponent implements OnInit, OnDestroy {
     return message.senderId?.toLowerCase() === this.username?.toLowerCase();
   }
 
+  isAIMessage(message: ChatMessage): boolean {
+    return message.senderId === this.aiUserId;
+  }
+
   isOnline(userId: string): boolean {
+    if (userId === this.aiUserId) return true;
     return this.onlineUsers.some(x => x.toLowerCase() === userId.toLowerCase());
   }
 
   scrollToBottom() {
     if (!this.scrollContainer) return;
+
     const element = this.scrollContainer.nativeElement;
     element.scrollTop = element.scrollHeight;
   }
 
   selectUser(user: any) {
     this.selectedUser = user;
+    this.aiTyping = false;
     this.loadConversation();
-    this.loadLastMessage();
+  }
+
+  private normalizeMessageDates(message: ChatMessage): ChatMessage {
+    return {
+      ...message,
+      sentAt: this.toUtcString(message.sentAt),
+      deliveredAt: message.deliveredAt ? this.toUtcString(message.deliveredAt) : undefined,
+      readAt: message.readAt ? this.toUtcString(message.readAt) : undefined
+    };
+  }
+
+  private toUtcString(value: string): string {
+    if (!value) return value;
+
+    const trimmed = value.trim();
+
+    if (
+      trimmed.endsWith('Z') ||
+      /[+-]\d{2}:\d{2}$/.test(trimmed)
+    ) {
+      return trimmed;
+    }
+
+    return `${trimmed}Z`;
   }
 }

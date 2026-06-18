@@ -117,6 +117,7 @@ builder.Services.AddScoped<MenuOptService>();
 builder.Services.AddHttpClient<MlPredictionService>();
 builder.Services.AddHttpClient<AIInsightService>();
 builder.Services.AddHttpClient<MenuAIInsightService>();
+builder.Services.AddHttpClient<RestaurantAIService>();
 
 var app = builder.Build();
 
