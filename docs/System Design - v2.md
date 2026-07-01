@@ -8,20 +8,20 @@
 
 ## 01 Executive Summary & Tech Stack
 
-The **AI Restaurant Demand & Menu Optimization System** is a full-stack, enterprise-grade internal web application designed to empower restaurant owners and managers with actionable, data-backed operational insights. By integrating order history, competitor pricing, holiday trends, and local artificial intelligence, the platform eliminates gut-feeling decisions, reduces food waste, maximizes profit margins, and facilitates seamless internal communications.
+The **AI Restaurant Demand & Menu Optimization System** is a full-stack, enterprise-grade internal web application designed to empower restaurant owners and managers with actionable, data-backed operational insights. By integrating order history, competitor pricing, holiday trends, and local artificial intelligence (including predictive modeling and a context-aware chat assistant), the platform eliminates gut-feeling decisions, reduces food waste, maximizes profit margins, and facilitates seamless internal communications.
 
 ### Technology Stack
 
 | Layer | Technology | Role in the System |
 | :--- | :--- | :--- |
-| **Frontend** | Angular 17+ (TypeScript) | Client-side dashboard, forms, real-time presence indicators, chat UI, interactive charts. |
+| **Frontend** | Angular 17+ (TypeScript) | Client-side dashboard, forms, real-time presence indicators, chat UI with AI assistant integration, interactive charts. |
 | **Backend** | ASP.NET Core 9 (C#) | RESTful API gateway, service orchestrator, SignalR hub coordinator, security manager. |
 | **Database** | MySQL  | Relational storage for menu items, orders, competitor price benchmarks, and persistent messages. |
 | **ORM** | Entity Framework Core | Database access and schema management from .NET code. |
 | **AI/ML Engine** | Python (FastAPI) | Predictive time-series server running custom-trained Prophet models. |
-| **LLM Inference** | Ollama (Local Phi-3) | Local LLM running structured JSON generation for pricing, promo strategies, and menu insights. |
+| **LLM Inference** | Ollama (Local LLMs) | Local LLM engine running `phi3` (structured JSON generation for pricing and menu insights) and `qwen2.5:3b` (real-time, context-enriched chat assistant). |
 | **Charts** | Chart.js | Visual rendering of peak hours, 30-day revenue trends, and top dish distributions. |
-| **Real-time Chats** | ASP.NET Core SignalR | Bidirectional WebSocket channel for live messaging and online status tracking. |
+| **Real-time Chats** | ASP.NET Core SignalR | Bidirectional WebSocket channel for live messaging, online status tracking, and AI chat assistant integration. |
 
 ---
 
@@ -39,8 +39,8 @@ Traditional restaurants face significant operational inefficiencies due to three
 
 | Role | Description | Access Rights |
 | :--- | :--- | :--- |
-| **Admin** | Restaurant Owner | Full read/write access. Can modify menu base prices, view all performance insights, manage accounts, and chat with managers. |
-| **Manager** | Shift Supervisor | Read-only access on pricing insights. Can view/add orders, monitor demand reports, track calendar events, and chat with admins. |
+| **Admin** | Restaurant Owner | Full read/write access. Can modify menu base prices, view all performance insights, manage accounts, chat with managers, and consult the AI assistant. |
+| **Manager** | Shift Supervisor | Read-only access on pricing insights. Can view/add orders, monitor demand reports, track calendar events, chat with admins, and consult the AI assistant. |
 
 *Note: This is an internal tool only. Customers, delivery riders, and kitchen line staff do not log into this platform.*
 
@@ -63,7 +63,7 @@ The system provides exactly eight core features:
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
 │                            REAL-TIME SIGNALR FEATURES                                  │
-├─► [8] Chat & Presence: Peer-to-peer real-time text chat and live online indicator.    │
+├─► [8] Chat, Presence & AI: Peer-to-peer live chat, online badges, and AI assistant.    │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -76,12 +76,12 @@ The system provides exactly eight core features:
 | **5** | **Reports Dashboard** | High-level business intelligence. Renders a 30-day revenue timeline (line chart), top dish distribution (doughnut chart), and sales splits by category. | Admin + Manager |
 | **6** | **Price Intelligence** | Benchmark dashboard comparing own menu pricing against market averages. Classifies items (e.g., *Potential price increase opportunity*, *Above market pricing*) using competitor minimum/maximum indices. | Admin + Manager |
 | **7** | **Festival Analytics** | Forecasting spikes on calendar holidays (Pongal, Diwali, Tamil New Year, Christmas, etc.). Predicts dish ranks, calculates growth percentages vs. last year, and displays AI operational guidance. | Admin + Manager |
-| **8** | **Chat & Presence** | Instant message console with live delivery/read receipts and connection tracking. Real-time online/offline badges keep admins and managers synced. | Admin + Manager |
+| **8** | **Chat, Presence & AI** | Instant message console with live delivery/read receipts and connection tracking. Real-time online/offline badges keep users synced. Integrates `RestaurantAI`, an automated assistant that answers inventory, stock, and menu planning questions using current forecasts and pricing recommendations as background context. | Admin + Manager |
 
 ### Authentication & Access Control
 A secure login screen guards the application. JSON Web Tokens (JWT) are generated on successful authentication. Role-based access control (RBAC) is enforced at two levels:
 * **Frontend Routing:** Angular guards restrict route access (`/` and `/chat` require active login session).
-* **API Endpoints:** ASP.NET controllers are secured using standard `[Authorize(Roles = "Admin,Manager")]` or `[Authorize(Roles = "Admin")]` filters.
+* **API Endpoints:** ASP.NET controllers are secured using standard `[Authorize(Roles = "Admin,Manager")]` or `[Authorize(Roles = "Admin")]` filters, with user identity resolved securely from claims.
 
 ---
 
@@ -106,17 +106,18 @@ The platform follows a modular, multi-service architecture utilizing RESTful com
 │  │   ReportsController   │ │  FestivalController  │ │  Chat & Presence Hubs │  │
 │  ├───────────────────────┤ ├──────────────────────┤ └──────────┬────────────┘  │
 │  │   DemandController    │ │   MenuController     │            │               │
-│  └───────────┬───────────┘ └──────────┬───────────┘            │               │
-│              │                        │                        │               │
-│      DemandService               MenuOptService          PresenceTracker       │
+│  └───────────┬───────────┘ └──────────┬───────────┘            ▼               │
+│              │                        │               RestaurantAIService      │
+│      DemandService               MenuOptService                │               │
 │              │                        │                        │               │
 │              ├────────────────────────┴────────────────────────┤               │
 │              ▼ HTTP/POST (/predict)                            ▼               │
 │    MlPredictionService ──────────────────────────────► [ML Service (FastAPI)] │
 │                                                        - load: prophet_models  │
-│              ├─────────────────────────────────────────► [Ollama phi3 Local]  │
-│              ▼ HTTP/POST (/api/generate)               - Format: json / text   │
-│    AIInsightService / MenuAIInsightService                             │
+│              ├─────────────────────────────────────────► [Ollama Local Hosts] │
+│              ▼ HTTP/POST (/api/generate)               - phi3 (optimizations)  │
+│    AIInsightService / MenuAIInsightService /           - qwen2.5:3b (chat assistant)
+│    RestaurantAIService                                                         │
 └──────────────┬─────────────────────────────────────────────────────────────────┘
                │ Entity Framework Core
                ▼
@@ -133,14 +134,14 @@ The platform follows a modular, multi-service architecture utilizing RESTful com
 1. **Presentation Layer (Angular 17+):**
    * Manages layout states, renders tables, and controls user actions.
    * Directs REST calls via a consolidated API client (`api.service.ts`).
-   * Manages SignalR hubs (`chat.service.ts` and `presence.service.ts`) for real-time updates.
+   * Manages SignalR hubs (`chat.service.ts` and `presence.service.ts`) for real-time updates, auto-reconnections, and AI typing states.
    * Stores the active JWT in memory/local storage and automatically appends it using an HTTP interceptor.
 
 2. **Business Application Layer (ASP.NET Core 9):**
    * Intercepts HTTP requests, validates tokens, and checks user role permissions.
-   * Orchestrates services: aggregates database rows, posts batch inputs to Python prediction hosts, and targets Ollama prompts.
+   * Orchestrates services: aggregates database rows, posts batch inputs to Python prediction hosts, targets Ollama prompts, and powers AI conversations.
    * Maps entities to contracts using lightweight Data Transfer Objects (DTOs).
-   * Runs the real-time SignalR Hubs (`ChatHub` and `PresenceHub`) with thread-safe online state tracking (`PresenceTracker`).
+   * Runs the real-time SignalR Hubs (`ChatHub` and `PresenceHub`) with thread-safe online state tracking (`PresenceTracker`) and delegates assistant tasks to `RestaurantAIService`.
 
 3. **ML Prediction Server (FastAPI):**
    * Python-based microservice listening on port `8000`.
@@ -149,8 +150,8 @@ The platform follows a modular, multi-service architecture utilizing RESTful com
 
 4. **LLM Orchestration Server (Ollama):**
    * Local background daemon running on port `11434`.
-   * Houses the lightweight `phi3` model (3.8B parameter).
-   * Supports structured JSON generation and analytical summary summaries.
+   * Houses the lightweight `phi3` model (for structured JSON menu optimizations) and the `qwen2.5:3b` model (for natural language assistant chats).
+   * Supports structured JSON generation and conversational analytics response generation.
 
 5. **Relational Database (MySQL):**
    * Stores persistent entities (menu records, historical orders, competitor pricing indices, and chat histories).
@@ -318,9 +319,9 @@ All endpoints use JSON payloads and require standard token authentication.
 ### 8. Message Logs Endpoints (`/api/chat/`)
 | Method | Route | Query Params | Description | Response Shape |
 | :--- | :--- | :--- | :--- | :--- |
-| **GET** | `conversation` | `currentUserId`, `otherUserId` | Load message history | `[{ "senderId": "admin", "receiverId": "manager", "content": "..." }]` |
+| **GET** | `conversation` | `otherUserId` | Load message history for authenticated user session | `[{ "senderId": "admin", "receiverId": "manager", "content": "..." }]` |
 | **POST** | `mark-read/{messageId}` | None | Set message status to read | `200 OK` |
-| **GET** | `last-message` | `currentUserId`, `otherUserId` | Load most recent thread entry | `{ "senderId": "admin", "content": "Hello", "sentAt": "..." }` |
+| **GET** | `last-message` | `otherUserId` | Load most recent thread entry for authenticated user session | `{ "senderId": "admin", "content": "Hello", "sentAt": "..." }` |
 | **DELETE**| `{messageId}` | None | Delete single message entry | `204 No Content` |
 
 ---
@@ -334,7 +335,7 @@ The frontend application is structured as a series of standalone features, route
   * **`services/`**
     * [api.service.ts](file:///Users/balajia/Desktop/AI_Restaurant_System/UI/src/app/core/services/api.service.ts): Global REST Client handles base queries for orders, menus, dashboards, and price statistics.
     * [auth.service.ts](file:///Users/balajia/Desktop/AI_Restaurant_System/UI/src/app/core/services/auth.service.ts): Handles credentials validation, token persistence, and role parsing.
-    * [chat.service.ts](file:///Users/balajia/Desktop/AI_Restaurant_System/UI/src/app/core/services/chat.service.ts): Connects to the SignalR chat endpoint, relays typing alerts, and broadcasts new incoming messages.
+    * [chat.service.ts](file:///Users/balajia/Desktop/AI_Restaurant_System/UI/src/app/core/services/chat.service.ts): Connects to the SignalR chat endpoint, manages connection state and lifecycle events (automatic reconnection), handles AI typing notifications, and sends/receives messages.
     * [presence.service.ts](file:///Users/balajia/Desktop/AI_Restaurant_System/UI/src/app/core/services/presence.service.ts): Connects to the SignalR presence hub, maps online users, and triggers global toast alerts when managers connect.
   * **`guards/`**
     * [auth-guard.ts](file:///Users/balajia/Desktop/AI_Restaurant_System/UI/src/app/core/guards/auth-guard.ts): Verifies active JWT token presence and blocks unauthenticated navigation.
@@ -353,6 +354,12 @@ The frontend application is structured as a series of standalone features, route
     * Displays pricing distribution, lowest competitor margins, and own price benchmarking models.
   * **`pages/chat/`**
     * Interactive messaging workspace displaying online status tags, history trails, and action toggles.
+
+### Security & User Identity Verification
+To prevent user spoofing across real-time and REST boundaries:
+* **Token Claims Alignment:** The JWT generation process attaches the user's username as both `ClaimTypes.Name` and `ClaimTypes.NameIdentifier`.
+* **SignalR Provider:** The `NameUserIdProvider` implements `IUserIdProvider` to resolve connection identity using `ClaimTypes.NameIdentifier`. This enforces that SignalR maps connections strictly by the authenticated user ID.
+* **REST & Hub Verification:** Endpoints and Hub actions (such as `MarkAsRead`, `DeleteMessage`, `GetConversation`, and `SendMessage`) no longer allow clients to specify the sender's user ID via query parameters or payloads. Instead, the server extracts `ClaimTypes.NameIdentifier` directly from the user claims context (`User.FindFirstValue` or `Context.UserIdentifier`), ensuring that users can only fetch or manipulate messages belonging to their active session.
 
 ---
 
@@ -513,6 +520,51 @@ Tracks instant message exchanges and user connectivity:
    * Sets `DeliveredAt = DateTime.UtcNow` and sends delivery confirmation back to the sender.
 4. **Read Status Tracking:** When User B views the chat window, Angular invokes `MarkAsRead(messageId)`. The hub updates the database, and broadcasts a `MessageRead(messageId)` event to User A, updating checkmarks on their screen.
 5. **Presence Deregistration:** When a user closes the browser tab, the connection times out. `PresenceHub` calls `UserDisconnected`, updates the tracker, and, if no connections remain for that user, broadcasts `UserOffline(userId)` to all clients.
+
+---
+
+### Flow 6: Real-Time AI Chat Assistant (Local LLM Integration)
+Enables users (Admins or Managers) to interact with an AI-powered restaurant operations assistant (`RestaurantAI`):
+
+```
+[User A (Manager)]              [SignalR ChatHub]           [RestaurantAIService]         [Ollama Server]
+        │                               │                            │                           │
+        │── SendMessage("RestaurantAI")►│                            │                           │
+        │    (Persist User Msg to DB)   │                            │                           │
+        │◄── ReceiveMessage (User Msg)──│                            │                           │
+        │◄── MessageDelivered ──────────│                            │                           │
+        │◄── AITyping ──────────────────│                            │                           │
+        │                               │── AskAsync(Prompt) ───────►│                           │
+        │                               │                            │── Fetch Forecast/Menu ───►[MySQL DB]
+        │                               │                            │◄── Return DB Context ─────[MySQL DB]
+        │                               │                            │                           │
+        │                               │                            │── POST /api/generate ────►│
+        │                               │                            │   (qwen2.5:3b)            │
+        │                               │                            │◄── Return AI Reply ───────│
+        │                               │◄── Return Reply Text ──────│                           │
+        │                               │                            │                           │
+        │                               │ (Persist AI Msg to DB)     │                           │
+        │◄── ReceiveMessage (AI Reply)──│                            │                           │
+        │◄── AIStoppedTyping ───────────│                            │                           │
+```
+
+#### Detailed Logic:
+1. **AI Message Interception:**
+   * When a user sends a message to receiver `"RestaurantAI"`, `ChatHub.SendMessage` intercepts it.
+   * A user message is instantiated, saved to the database, and broadcasted back to the sender's client with a delivery receipt.
+2. **Typing Status Broadcast:**
+   * The hub immediately sends the `AITyping` event to the caller. On the Angular UI, this triggers a dynamic message bubble with a bouncing ellipsis animation under the assistant's header.
+3. **Contextual Enrichment & LLM Invocation:**
+   * `ChatHub` delegates prompt execution to the backend `RestaurantAIService`.
+   * `RestaurantAIService` retrieves current demand forecasts via `DemandService` and pricing insights via `MenuOptService`.
+   * The services query historical records and active models in MySQL to compile the data into a JSON serialized payload.
+   * A master prompt is constructed, binding the operational context, the user's question, and key generation rules (simple English, bullet points, stock recommendations, confidence level, and a limit of 120 words).
+4. **Local LLM Inference:**
+   * `RestaurantAIService` targets the local Ollama daemon's `/api/generate` endpoint on port `11434`, passing the prompt parameters and selecting the `qwen2.5:3b` model.
+   * Ollama returns the generated analytical reply.
+5. **Response Dispatch & Cleanup:**
+   * The hub instantiates the AI message model, commits it to the MySQL `Messages` table, and relays the reply content via `ReceiveMessage` to the client.
+   * Finally, the hub dispatches the `AIStoppedTyping` event, turning off the dynamic animation bubble in the UI.
 
 ---
 
