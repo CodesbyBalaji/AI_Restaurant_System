@@ -45,12 +45,12 @@ AI_Restaurant_System/
 │   ├── Hubs/                    # SignalR hubs (ChatHub, PresenceHub)
 │   ├── Services/                # Business logic, Menu Optimization, Demand Forecasting, RestaurantAIService
 │   ├── Data/                    # AppDbContext, Entity Framework configurations & migrations
-│   └── Tests/                   # API test project
+│   └── tests/                   # API test project
 │
 ├── UI/                          # Angular 17+ client application
 │   ├── src/app/core/            # Guards, interceptors, SignalR chat & presence services
 │   ├── src/app/features/        # Dashboard, Orders, Pricing, Reports, Chat, etc.
-│   └── Tests/                   # UI test project
+│   └── tests/                   # UI test project
 │
 └── docs/                        # Documentation & specifications
     └── System Design - v2.md    # Detailed architectural design specification
