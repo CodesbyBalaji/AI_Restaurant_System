@@ -32,6 +32,7 @@ An enterprise-grade, full-stack predictive dashboard and operations management s
 
 ## 📂 Project Structure
 
+```text
 AI_Restaurant_System/
 ├── AI/                          # Python FastAPI service & Prophet forecasting scripts
 │   ├── app.py                   # Main forecast REST endpoints (Port 8000)
@@ -53,7 +54,7 @@ AI_Restaurant_System/
 │
 └── docs/                        # Documentation & specifications
     └── System Design - v2.md    # Detailed architectural design specification
-
+```
 ---
 
 ## ⚙️ Quick Start & Setup Guide
