@@ -13,26 +13,26 @@ import { AuthService } from '../../../core/services/auth.service';
 export class CreateOrderComponent implements OnInit {
 
   menu: any[] = [];
-  selectedItemId: number = 0;
-  quantity: number = 1;
+  selectedItemId = 0;
+  quantity = 1;
 
   constructor(
     private api: ApiService,
     public auth: AuthService
   ) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.loadMenu();
   }
 
-  loadMenu() {
+  loadMenu(): void {
     this.api.getMenu().subscribe({
       next: (res: any) => {
         this.menu = res;
       },
       error: (err) => {
         console.error(err);
-        alert("Failed to load menu");
+        alert('Failed to load menu');
       }
     });
   }
@@ -41,20 +41,24 @@ export class CreateOrderComponent implements OnInit {
     return this.auth.getRole() === 'Manager';
   }
 
-  placeOrder() {
+  getSelectedItem() {
+    return this.menu.find(item => item.id == this.selectedItemId);
+  }
+
+  placeOrder(): void {
 
     if (!this.isManager()) {
-      alert("Only Manager can place orders");
+      alert('Only Manager can place orders');
       return;
     }
 
     if (this.selectedItemId === 0) {
-      alert("Please select an item");
+      alert('Please select a menu item');
       return;
     }
 
     if (this.quantity <= 0) {
-      alert("Quantity must be greater than 0");
+      alert('Quantity must be greater than 0');
       return;
     }
 
@@ -64,16 +68,14 @@ export class CreateOrderComponent implements OnInit {
     };
 
     this.api.createOrder(order).subscribe({
-      next: (res) => {
-        alert("Order placed successfully!");
-        console.log(res);
-
+      next: () => {
+        alert('Order placed successfully!');
         this.selectedItemId = 0;
         this.quantity = 1;
       },
       error: (err) => {
         console.error(err);
-        alert("Error placing order");
+        alert('Error placing order');
       }
     });
   }
